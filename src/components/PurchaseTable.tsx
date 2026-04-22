@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Calendar as CalIcon, Filter, Search, CreditCard as CardIcon, ShoppingBag, Wallet } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar as CalIcon, Filter, Search, CreditCard as CardIcon, ShoppingBag, Wallet, CheckCircle2 } from 'lucide-react';
 import { format, addMonths, setDate, getDaysInMonth } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -35,13 +35,13 @@ interface PurchaseTableProps {
   type: PurchaseType;
   cards?: CreditCard[];
   onRefresh: () => void;
+  externalSearch?: string;
 }
 
-export function PurchaseTable({ purchases, type, cards = [], onRefresh }: PurchaseTableProps) {
+export function PurchaseTable({ purchases, type, cards = [], onRefresh, externalSearch = '' }: PurchaseTableProps) {
   const [open, setOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [cardFilter, setCardFilter] = useState<string>('all');
+  const [showPaidOnly, setShowPaidOnly] = useState(false);
   
   // Form State
   const [description, setDescription] = useState('');
@@ -198,47 +198,33 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
 
   const filteredPurchases = purchases
     .filter(p => {
-      const matchesSearch = p.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (p.notes && p.notes.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                          (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesCard = cardFilter === 'all' || p.card_id === cardFilter;
-      return matchesSearch && matchesCard;
+      const query = externalSearch.toLowerCase();
+      const matchesSearch = p.description.toLowerCase().includes(query) || 
+                          (p.notes && p.notes.toLowerCase().includes(query)) ||
+                          (p.category && p.category.toLowerCase().includes(query));
+      const matchesPaidFilter = !showPaidOnly || p.status === 'paid';
+      return matchesSearch && matchesPaidFilter;
     })
     .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime());
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-          <Input 
-            placeholder="Search registry..." 
-            className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-
-        {/* Card Filter */}
-        {type === 'credit_card' && (
-          <Select value={cardFilter} onValueChange={setCardFilter}>
-            <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl">
-              <SelectValue placeholder="All Cards" />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-              <SelectItem value="all">All Cards Registry</SelectItem>
-              {cards.map(c => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
-
       <div className="flex justify-between items-center bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
         <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Transaction Registry</h2>
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowPaidOnly(!showPaidOnly)}
+            className={cn(
+              "h-8 rounded-full text-[10px] font-bold uppercase px-4 border border-zinc-800",
+              showPaidOnly ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "text-zinc-500"
+            )}
+          >
+            <Filter className="w-3 h-3 mr-2" />
+            {showPaidOnly ? 'Showing Paid' : 'Show Paid'}
+          </Button>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-8 px-4">
               <Plus className="w-3.5 h-3.5" />
@@ -427,8 +413,9 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
           </DialogContent>
         </Dialog>
       </div>
+    </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
         <Table>
           <TableHeader className="bg-zinc-950/50">
               <TableRow className="border-zinc-800 hover:bg-transparent">
@@ -535,6 +522,12 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                   )}
                   <TableCell className="text-center pr-6">
                     <div className="flex justify-center gap-1">
+                      <Button variant="ghost" size="icon" className={cn(
+                        "h-8 w-8 hover:bg-emerald-500/10 transition-colors",
+                        p.status === 'paid' ? "text-emerald-500" : "text-zinc-500 hover:text-emerald-400"
+                      )} onClick={() => toggleStatus(p)}>
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-indigo-500/10 hover:text-indigo-400 text-zinc-500" onClick={() => handleEdit(p)}>
                         <Edit className="h-3.5 w-3.5" />
                       </Button>

@@ -19,6 +19,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState<'dashboard' | 'cards' | 'logs' | 'tiktok' | 'other'>('dashboard');
+  const [globalSearch, setGlobalSearch] = useState('');
 
   const { cards, purchases, loading: dataLoading, refresh } = useData();
 
@@ -68,9 +69,20 @@ export default function App() {
 
           {currentView === 'logs' && (
             <div className="space-y-12">
-              <header className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold tracking-tight text-white">Purchase Registry</h1>
-                <p className="text-sm text-zinc-500 tracking-wide">Detailed transaction logs categorized by source.</p>
+              <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="space-y-1">
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Purchase Registry</h1>
+                  <p className="text-sm text-zinc-500 tracking-wide">Detailed transaction logs categorized by source.</p>
+                </div>
+                <div className="relative w-full md:w-96">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <Input 
+                    placeholder="Search all registries..." 
+                    className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
+                    value={globalSearch}
+                    onChange={(e) => setGlobalSearch(e.target.value)}
+                  />
+                </div>
               </header>
               
               <div className="space-y-16">
@@ -85,6 +97,7 @@ export default function App() {
                       type="credit_card"
                       cards={cards}
                       onRefresh={refresh}
+                      externalSearch={globalSearch}
                     />
                   </div>
                 ))}
@@ -94,28 +107,52 @@ export default function App() {
 
           {currentView === 'tiktok' && (
             <div className="space-y-6">
-              <header className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold tracking-tight text-white">TikTok Paylater</h1>
-                <p className="text-sm text-zinc-500 tracking-wide">Manage your micro-installments and monthly payments.</p>
+              <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="space-y-1">
+                  <h1 className="text-3xl font-bold tracking-tight text-white">TikTok Paylater</h1>
+                  <p className="text-sm text-zinc-500 tracking-wide">Manage your micro-installments and monthly payments.</p>
+                </div>
+                <div className="relative w-full md:w-96">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <Input 
+                    placeholder="Search TikTok registry..." 
+                    className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
+                    value={globalSearch}
+                    onChange={(e) => setGlobalSearch(e.target.value)}
+                  />
+                </div>
               </header>
               <PurchaseTable 
                 purchases={purchases.filter(p => p.type === 'tiktok_paylater')} 
                 type="tiktok_paylater"
                 onRefresh={refresh}
+                externalSearch={globalSearch}
               />
             </div>
           )}
 
           {currentView === 'other' && (
             <div className="space-y-6">
-              <header className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold tracking-tight text-white">Other Expenses</h1>
-                <p className="text-sm text-zinc-500 tracking-wide">Log cash transactions and everyday survival costs.</p>
+              <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="space-y-1">
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Other Expenses</h1>
+                  <p className="text-sm text-zinc-500 tracking-wide">Log cash transactions and everyday survival costs.</p>
+                </div>
+                <div className="relative w-full md:w-96">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <Input 
+                    placeholder="Search expenses..." 
+                    className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
+                    value={globalSearch}
+                    onChange={(e) => setGlobalSearch(e.target.value)}
+                  />
+                </div>
               </header>
               <PurchaseTable 
                 purchases={purchases.filter(p => p.type === 'other')} 
                 type="other"
                 onRefresh={refresh}
+                externalSearch={globalSearch}
               />
             </div>
           )}
