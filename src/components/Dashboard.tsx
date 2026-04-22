@@ -6,6 +6,7 @@ import { CreditCard as CardIcon, DollarSign, TrendingUp, AlertCircle, RefreshCcw
 import { format, subDays, isSameDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
+import { BankLogo } from './BankLogo';
 
 interface DashboardProps {
   cards: CreditCard[];
@@ -109,7 +110,10 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                 <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full blur-3xl opacity-20" style={{ backgroundColor: card.color }}></div>
                 <div className="flex justify-between items-center relative z-10">
                   <span className="text-[10px] font-mono text-zinc-400">**** {card.last_four || '0000'}</span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-white/5 rounded border border-white/10">{card.bank_name || 'BANK'}</span>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 rounded border border-white/10 uppercase tracking-widest text-[10px] font-bold">
+                    <BankLogo bankName={card.bank_name || 'BANK'} className="w-3.5 h-3.5" />
+                    <span>{card.bank_name || 'BANK'}</span>
+                  </div>
                 </div>
                 <div className="relative z-10">
                   <div className="flex justify-between items-end mb-0.5">
@@ -147,7 +151,10 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
         {/* TikTok Paylater - Span 4 */}
         <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">TikTok PayLater</h2>
+            <div className="flex items-center gap-2">
+              <BankLogo bankName="TikTok" className="w-4 h-4" />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">TikTok PayLater</h2>
+            </div>
             <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 text-[10px] uppercase font-bold">Installments</Badge>
           </div>
           <div className="space-y-3">

@@ -37,6 +37,12 @@ export function Auth({ onSessionChange }: { onSessionChange: (user: User | null)
     <div className="flex items-center justify-center min-h-screen bg-muted/50 p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold text-white italic">
+              CC
+            </div>
+            <span className="text-xl font-bold tracking-tight">Cc Records</span>
+          </div>
           <CardTitle className="text-2xl font-bold flex items-center gap-2">
             {isLogin ? <LogIn className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
             {isLogin ? 'Welcome back' : 'Create an account'}

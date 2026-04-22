@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { BankLogo } from './BankLogo';
 
 interface CardListProps {
   cards: CreditCard[];
@@ -181,8 +182,8 @@ export function CardList({ cards, onRefresh }: CardListProps) {
             <div className="absolute top-0 right-0 w-32 h-32 blur-[80px] opacity-20 pointer-events-none" style={{ backgroundColor: card.color }} />
             
             <header className="flex justify-between items-start mb-8 relative z-10">
-              <div className="p-2.5 bg-zinc-800/50 rounded-xl border border-zinc-700/50">
-                <CardIcon className="h-5 w-5" style={{ color: card.color }} />
+              <div className="p-2.5 bg-zinc-800/50 rounded-xl border border-zinc-700/50 flex items-center justify-center">
+                <BankLogo bankName={card.bank_name || 'BANK'} className="h-6 w-6" />
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white" onClick={() => handleEdit(card)}>
@@ -196,7 +197,10 @@ export function CardList({ cards, onRefresh }: CardListProps) {
 
             <div className="space-y-6 relative z-10">
               <div>
-                <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest mb-1">{card.bank_name || 'Generic Issuer'}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <BankLogo bankName={card.bank_name || 'BANK'} className="w-3.5 h-3.5" />
+                  <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">{card.bank_name || 'Generic Issuer'}</p>
+                </div>
                 <h2 className="text-xl font-bold text-white tracking-tight">{card.name}</h2>
                 <code className="text-[10px] font-mono text-zinc-500 mt-2 block tracking-widest uppercase italic bg-zinc-950/50 w-fit px-2 py-0.5 rounded">
                   **** {card.last_four || 'XXXX'}

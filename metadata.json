@@ -1,5 +1,5 @@
 {
-  "name": "CardLog - Credit Card & Purchase Tracker",
+  "name": "Cc Records",
   "description": "Log credit card purchases, set limits, track TikTok Paylater installments, and manage everyday expenses with Supabase integration.",
   "requestFramePermissions": [],
   "majorCapabilities": []
