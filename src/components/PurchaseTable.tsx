@@ -250,6 +250,25 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-1.5">
+                    <Label htmlFor="category" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Category</Label>
+                    <Input id="category" value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Food, Travel" className="bg-zinc-900 border-zinc-800 rounded-xl" />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Status</Label>
+                    <Select value={status} onValueChange={(val: any) => setStatus(val)}>
+                      <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="paid" className="text-emerald-400">Paid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-1.5">
                     <Label htmlFor="amount" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Amount (PHP)</Label>
                     <Input id="amount" type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl" required />
                   </div>
@@ -287,23 +306,11 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                   <div className="grid gap-1.5">
-                    <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Status</Label>
-                    <Select value={status} onValueChange={(val: any) => setStatus(val)}>
-                      <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="paid" className="text-emerald-400">Paid</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                   <div className="grid gap-1.5">
+                  <div className="grid gap-1.5">
                     <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Payment Date</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="bg-zinc-900 border-zinc-800 rounded-xl text-xs justify-start h-10">
+                        <Button variant="outline" className="bg-zinc-900 border-zinc-800 rounded-xl text-xs justify-start h-10 w-full">
                           <CalIcon className="mr-2 h-3.5 w-3.5 text-zinc-500" />
                           {dueDate ? format(dueDate, 'MMM d, yyyy') : <span>Pick a date</span>}
                         </Button>
@@ -313,17 +320,10 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                       </PopoverContent>
                     </Popover>
                   </div>
-                </div>
-
-                <div className="grid gap-1.5">
-                  <Label htmlFor="notes" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Transaction Notes</Label>
-                  <Input 
-                    id="notes" 
-                    value={notes} 
-                    onChange={e => setNotes(e.target.value)} 
-                    placeholder="Enter additional details..." 
-                    className="bg-zinc-900 border-zinc-800 rounded-xl"
-                  />
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="notes" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Notes</Label>
+                    <Input id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add details..." className="bg-zinc-900 border-zinc-800 rounded-xl" />
+                  </div>
                 </div>
               </div>
               <DialogFooter>
