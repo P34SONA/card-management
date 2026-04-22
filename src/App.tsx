@@ -146,7 +146,7 @@ export default function App() {
               </header>
               
               <div className="space-y-16">
-                {cards.map(card => (
+                {cards.filter(c => c.account_type === 'credit').map(card => (
                   <div key={card.id} className="space-y-4">
                     <div className="flex items-center gap-3 px-2">
                        <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: card.color }} />

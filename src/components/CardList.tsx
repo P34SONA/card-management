@@ -90,7 +90,14 @@ export function CardList({ cards, onRefresh }: CardListProps) {
       setOpen(false);
       resetForm();
     } catch (error: any) {
-      toast.error(error.message);
+      if (error.message?.includes('account_type')) {
+        toast.error('Database column missing', {
+          description: 'Please run: ALTER TABLE credit_cards ADD COLUMN account_type TEXT DEFAULT \'credit\'; in your Supabase SQL Editor.',
+          duration: 10000,
+        });
+      } else {
+        toast.error(error.message);
+      }
     } finally {
       setLoading(false);
     }

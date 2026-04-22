@@ -1,7 +1,16 @@
+-- ==========================================
+-- EMERGENCY UPGRADE (If you see "column not found" error)
+-- ==========================================
+-- ALTER TABLE public.credit_cards ADD COLUMN IF NOT EXISTS account_type TEXT DEFAULT 'credit';
+-- ==========================================
+
 -- COPY AND PASTE THIS INTO YOUR SUPABASE SQL EDITOR --
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- IF YOU ARE UPDATING AN EXISTING DATABASE, RUN THIS FIRST:
+-- ALTER TABLE public.credit_cards ADD COLUMN IF NOT EXISTS account_type TEXT DEFAULT 'credit';
 
 -- Create table for credit cards
 CREATE TABLE IF NOT EXISTS public.credit_cards (
