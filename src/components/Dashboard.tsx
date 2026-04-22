@@ -65,16 +65,21 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
   const getLast7DaysData = () => {
     const days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i)).reverse();
     return days.map(day => {
-      const dayPurchases = purchases.filter(p => {
-        const purchaseDate = new Date(p.purchase_date);
-        const matchesDay = isSameDay(purchaseDate, day);
-        const matchesCard = selectedCardId ? p.card_id === selectedCardId : true;
-        return matchesDay && matchesCard;
+      const dataPoint: any = { name: format(day, 'MMM dd') };
+      
+      // Calculate spend for each credit card specifically
+      creditCards.forEach(card => {
+        const cardDayPurchases = purchases.filter(p => {
+          const purchaseDate = new Date(p.purchase_date);
+          const matchesDay = isSameDay(purchaseDate, day);
+          const matchesCard = p.card_id === card.id;
+          return matchesDay && matchesCard;
+        });
+        
+        dataPoint[card.id] = cardDayPurchases.reduce((sum, p) => sum + Number(p.amount), 0);
       });
-      return {
-        name: format(day, 'MMM dd'),
-        value: dayPurchases.reduce((sum, p) => sum + Number(p.amount), 0)
-      };
+      
+      return dataPoint;
     });
   };
 
@@ -210,22 +215,34 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
         <section className="col-span-12 lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col shadow-xl">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">7-Day Trend</h2>
-            <div className="flex items-center gap-2">
-               <div className="w-2 h-2 rounded bg-indigo-500" />
-               <span className="text-[10px] text-zinc-500 uppercase font-bold">Daily Spend</span>
-            </div>
           </div>
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={lineData}>
                 <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} tickFormatter={(val) => `₱${val}`} width={40} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px', border: '1px solid #3f3f46' }}
-                  itemStyle={{ color: '#818cf8', fontWeight: 'bold' }}
+                  itemStyle={{ fontSize: '10px', fontWeight: 'bold' }}
                   labelStyle={{ color: '#71717a', marginBottom: '4px', fontWeight: 'bold' }}
-                  formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Spent']}
+                  formatter={(value: any, name: string) => [`₱${Number(value).toLocaleString()}`, name]}
                 />
-                <Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#18181b' }} activeDot={{ r: 6, fill: '#818cf8' }} />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px', fontSize: '10px', textTransform: 'uppercase', fontStyle: 'normal', fontWeight: '800' }} />
+                {creditCards
+                  .filter(card => selectedCardId ? card.id === selectedCardId : true)
+                  .map((card) => (
+                    <Line 
+                      key={card.id}
+                      type="monotone" 
+                      dataKey={card.id} 
+                      name={card.bank_name || card.name}
+                      stroke={card.color} 
+                      strokeWidth={2.5} 
+                      dot={{ r: 3, fill: card.color, strokeWidth: 1, stroke: '#18181b' }} 
+                      activeDot={{ r: 5, fill: card.color }} 
+                      connectNulls
+                    />
+                ))}
               </LineChart>
             </ResponsiveContainer>
           </div>
