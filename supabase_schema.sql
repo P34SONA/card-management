@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS public.credit_cards (
   current_balance DECIMAL(12, 2) NOT NULL DEFAULT 0,
   billing_cycle_day INTEGER,
   color TEXT DEFAULT '#3b82f6',
+  account_type TEXT DEFAULT 'credit',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

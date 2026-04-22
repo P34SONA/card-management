@@ -86,7 +86,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
       </header>
 
       <div className="grid grid-cols-12 gap-4">
-        {/* Credit Cards Overview - Span 8 */}
+        {/* Row 1: Credit Cards (8) & Other Accounts (4) */}
         <section className="col-span-12 lg:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Active Credit Cards</h2>
@@ -162,7 +162,6 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        {/* Savings & Other Accounts - Span 4 */}
         <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Other Accounts</h2>
@@ -199,12 +198,12 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
               </div>
             ))}
             {otherAccounts.length === 0 && (
-              <div className="text-center py-10 text-zinc-600 italic text-sm">No linked savings or other cards</div>
+              <div className="text-center py-10 text-zinc-600 italic text-sm">No linked accounts</div>
             )}
           </div>
         </section>
 
-        {/* TikTok Paylater - Span 4 */}
+        {/* Row 2: TikTok (4), Spending Chart (4), Borrow Distribution (4) */}
         <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">TikTok PayLater</h2>
@@ -223,70 +222,72 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                 </div>
               </div>
             ))}
-            {purchases.filter(p => p.type === 'tiktok_paylater').length === 0 && (
+            {purchases.filter(p => p.type === 'tiktok_paylater' && p.status === 'pending').length === 0 && (
               <div className="text-center py-8 text-zinc-600 italic text-sm">No active paylater logs</div>
             )}
           </div>
         </section>
 
-        {/* Chart Section - Span 8 */}
-        <section className="col-span-12 lg:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
+        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-               {selectedCardId ? `${selectedCard?.name} Spending Trend` : 'Global Spending Overview'}
-            </h2>
-            {selectedCardId && (
-              <Badge style={{ backgroundColor: selectedCard?.color + '22', color: selectedCard?.color, borderColor: selectedCard?.color + '44' }} variant="line" className="text-[10px] uppercase font-bold px-2 py-0.5 rounded">
-                Last 7 Days
-              </Badge>
-            )}
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Global Spending</h2>
           </div>
-          <div className="h-[240px] w-full">
+          <div className="h-[180px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              {selectedCardId ? (
-                <LineChart data={lineData}>
-                  <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
-                    itemStyle={{ color: selectedCard?.color }}
-                    formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Amount']}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke={selectedCard?.color} 
-                    strokeWidth={3} 
-                    dot={{ r: 4, fill: selectedCard?.color, strokeWidth: 0 }} 
-                    activeDot={{ r: 6, strokeWidth: 0 }}
-                  />
-                </LineChart>
-              ) : (
-                <BarChart data={barData.slice(0, 5)}>
-                  <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
-                    itemStyle={{ color: '#818cf8' }}
-                    formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Amount']}
-                  />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={20}>
-                    {barData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              )}
+              <BarChart data={barData.slice(0, 5)}>
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
+                  itemStyle={{ color: '#818cf8' }}
+                  formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Amount']}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={20}>
+                  {barData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </section>
 
-        {/* Borrowed Money - Span 4 */}
-        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
+        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Trend History</h2>
+          </div>
+          <div className="h-[180px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={lineData}>
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
+                  itemStyle={{ color: '#818cf8' }}
+                  formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Amount']}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="#818cf8" 
+                  strokeWidth={2} 
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+
+        {/* Row 3: Borrowed Money Full List (12) */}
+        <section className="col-span-12 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Borrowed Money</h2>
+            <div className="text-right">
+              <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Summary Total</p>
+              <p className="text-xl font-mono font-bold text-indigo-400">₱{purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0).toLocaleString()}</p>
+            </div>
           </div>
-          <div className="flex-1 space-y-1">
-            {purchases.filter(p => p.type === 'other').slice(0, 5).map(p => (
-              <div key={p.id} className="flex justify-between items-center p-2.5 hover:bg-zinc-800/40 rounded-xl transition-colors group">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {purchases.filter(p => p.type === 'other').map(p => (
+              <div key={p.id} className="flex justify-between items-center p-3 bg-zinc-800/40 border border-zinc-800/50 rounded-2xl hover:bg-zinc-800/60 transition-colors group">
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-zinc-200 group-hover:text-white">{p.description}</span>
                   <span className="text-[10px] text-zinc-500 font-mono uppercase">{format(new Date(p.purchase_date), 'MMM dd')}</span>
@@ -294,12 +295,9 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                 <span className="text-xs font-mono font-bold text-indigo-400">₱{Number(p.amount).toLocaleString()}</span>
               </div>
             ))}
-          </div>
-          <div className="pt-4 border-t border-zinc-800/60 mt-auto">
-            <div className="flex justify-between text-[11px] font-bold tracking-widest text-zinc-400">
-              <span>SUMMARY TOTAL</span>
-              <span className="text-indigo-400 font-mono">₱{purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0).toLocaleString()}</span>
-            </div>
+            {purchases.filter(p => p.type === 'other').length === 0 && (
+              <div className="col-span-full py-10 text-center text-zinc-600 italic text-sm">No borrowed records</div>
+            )}
           </div>
         </section>
       </div>
