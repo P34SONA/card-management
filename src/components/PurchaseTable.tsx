@@ -129,19 +129,19 @@ export function PurchaseTable({
       <Table>
           <TableHeader className="bg-zinc-950/50">
               <TableRow className="border-zinc-800 hover:bg-transparent">
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 px-6 text-center">{type === 'tiktok_paylater' ? 'Name' : 'Description'}</TableHead>
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">{type === 'tiktok_paylater' ? 'Merchant' : 'Category'}</TableHead>
-                {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Card</TableHead>}
-                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Total Amount</TableHead>}
-                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Monthly</TableHead>}
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 px-6 text-left">{type === 'tiktok_paylater' ? 'Name' : 'Description'}</TableHead>
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-left">{type === 'tiktok_paylater' ? 'Merchant' : 'Category'}</TableHead>
+                {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-left">Card</TableHead>}
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Total Amount</TableHead>}
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Monthly</TableHead>}
                 {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Months</TableHead>}
-                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Paid Months</TableHead>}
-                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Remaining</TableHead>}
-                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Start Date</TableHead>}
-                {(type === 'credit_card' || type === 'other') && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Amount</TableHead>}
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Paid</TableHead>}
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Remaining</TableHead>}
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Start Date</TableHead>}
+                {(type === 'credit_card' || type === 'other') && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Amount</TableHead>}
                 <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Status</TableHead>
-                {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Payment Due</TableHead>}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Notes</TableHead>
+                {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Payment Due</TableHead>}
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-left px-6">Notes</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
           </TableHeader>
@@ -155,32 +155,30 @@ export function PurchaseTable({
             ) : (
               filteredPurchases.map((p) => (
                 <TableRow key={p.id} className="border-zinc-800/50 hover:bg-zinc-800/20 transition-colors">
-                  <TableCell className="px-6 text-center">
-                    <div className="flex flex-col items-center">
-                      <span className="font-medium text-zinc-100">{p.description}</span>
-                    </div>
+                  <TableCell className="px-6 text-left">
+                    <span className="font-medium text-zinc-100">{p.description}</span>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-left">
                     {type === 'tiktok_paylater' ? (
                       <span className="text-xs text-zinc-400">{p.notes?.split('|')[0]?.trim() || 'Tiktok'}</span>
                     ) : (
-                      <Badge variant="outline" className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[9px] uppercase tracking-tighter px-1.5 py-0 mx-auto">
+                      <Badge variant="outline" className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[9px] uppercase tracking-tighter px-1.5 py-0">
                         {p.category || 'Other'}
                       </Badge>
                     )}
                   </TableCell>
                   {type === 'credit_card' && (
-                    <TableCell className="text-zinc-400 text-xs text-center">
+                    <TableCell className="text-zinc-400 text-xs text-left">
                       {cards.find(c => c.id === p.card_id)?.name || 'Default'}
                     </TableCell>
                   )}
                   {type === 'tiktok_paylater' && (
-                    <TableCell className="text-center font-bold font-mono text-zinc-100">
+                    <TableCell className="text-right font-bold font-mono text-zinc-100">
                       ₱{Number(p.amount).toLocaleString()}
                     </TableCell>
                   )}
                   {type === 'tiktok_paylater' && (
-                    <TableCell className="text-center font-bold font-mono text-zinc-400">
+                    <TableCell className="text-right font-bold font-mono text-zinc-400">
                       ₱{Number(p.monthly_amount || 0).toLocaleString()}
                     </TableCell>
                   )}
@@ -195,22 +193,22 @@ export function PurchaseTable({
                     </TableCell>
                   )}
                   {type === 'tiktok_paylater' && (
-                    <TableCell className="text-center font-bold font-mono text-indigo-400 text-sm">
+                    <TableCell className="text-right font-bold font-mono text-indigo-400 text-sm">
                       ₱{Number(p.balance ?? p.amount).toLocaleString()}
                     </TableCell>
                   )}
                   {type === 'tiktok_paylater' && (
-                    <TableCell className="text-center text-xs text-zinc-400">
-                      {format(new Date(p.purchase_date), 'MMMM dd, yyyy')}
+                    <TableCell className="text-right text-xs text-zinc-400">
+                      {format(new Date(p.purchase_date), 'MMM dd, yyyy')}
                     </TableCell>
                   )}
                   {(type === 'credit_card' || type === 'other') && (
-                    <TableCell className="text-center font-bold font-mono text-white">
+                    <TableCell className="text-right font-bold font-mono text-white">
                       ₱{Number(p.amount).toLocaleString()}
                     </TableCell>
                   )}
                   <TableCell className="text-center">
-                    <button onClick={() => toggleStatus(p)}>
+                    <button onClick={() => toggleStatus(p)} className="block mx-auto">
                       <Badge className={cn(
                         "cursor-pointer text-[10px] font-bold uppercase px-3 py-1 rounded-sm border transition-all",
                         p.status === 'paid' 
@@ -221,23 +219,23 @@ export function PurchaseTable({
                       </Badge>
                     </button>
                     {!editingPurchase && type === 'tiktok_paylater' && p.status !== 'paid' && (
-                      <div className="mt-1 text-[8px] text-zinc-500 uppercase tracking-tighter">
+                      <div className="mt-1 text-[8px] text-zinc-500 uppercase tracking-tighter text-center">
                          Due: {p.due_date ? format(new Date(p.due_date), 'MMM dd') : '-'}
                       </div>
                     )}
                   </TableCell>
                   {type === 'credit_card' && (
-                    <TableCell className="text-center text-xs text-zinc-400">
+                    <TableCell className="text-right text-xs text-zinc-400">
                       {format(new Date(p.due_date), 'MMM dd, yyyy')}
                     </TableCell>
                   )}
-                  <TableCell className="text-center text-xs text-zinc-500 max-w-[150px] truncate">
+                  <TableCell className="text-left text-xs text-zinc-500 max-w-[200px] truncate px-6">
                     {type === 'tiktok_paylater' 
                       ? (p.notes?.includes('|') ? p.notes.split('|')[1]?.trim() : '')
                       : p.notes
                     }
                   </TableCell>
-                  <TableCell className="text-center pr-6">
+                  <TableCell className="text-right pr-6">
                     <div className="flex justify-center gap-1">
                       <Button variant="ghost" size="icon" className={cn(
                         "h-8 w-8 hover:bg-emerald-500/10 transition-colors",
