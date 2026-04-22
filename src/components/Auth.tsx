@@ -39,9 +39,9 @@ export function Auth({ onSessionChange }: { onSessionChange: (user: User | null)
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold text-white italic">
-              CC
+              PR
             </div>
-            <span className="text-xl font-bold tracking-tight">Cc Records</span>
+            <span className="text-xl font-bold tracking-tight">Personal Records</span>
           </div>
           <CardTitle className="text-2xl font-bold flex items-center gap-2">
             {isLogin ? <LogIn className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}

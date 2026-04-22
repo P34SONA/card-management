@@ -22,10 +22,10 @@ export function Sidebar({ currentView, onViewChange, onLogout }: SidebarProps) {
       <div className="p-8 pb-10">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold text-white italic">
-            CC
+            PR
           </div>
           <h1 className="text-xl font-bold tracking-tight text-white whitespace-nowrap">
-            Cc Records
+            Personal Records
           </h1>
         </div>
       </div>

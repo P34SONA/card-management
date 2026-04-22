@@ -20,15 +20,19 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
   // Calculate dynamic balance for each card based on pending purchases
   // ONLY include purchases of type 'credit_card'
   const cardsWithCalculatedBalance = cards.map(card => {
-    const cardPurchases = purchases.filter(p => 
-      p.card_id === card.id && 
-      p.status === 'pending' &&
-      p.type !== 'other' // User request: "do not add the other expenses total amount to any cards"
-    );
-    const calculatedBalance = cardPurchases.reduce((sum, p) => sum + Number(p.amount), 0);
-    
     // Defensive check for account_type if DB column is missing
     const type = (card as any).account_type || 'credit';
+    
+    let calculatedBalance = 0;
+    if (type === 'credit') {
+      const cardPurchases = purchases.filter(p => 
+        p.card_id === card.id && 
+        p.status === 'pending' &&
+        p.type !== 'other' // User request: "do not add the other expenses total amount to any cards"
+      );
+      calculatedBalance = cardPurchases.reduce((sum, p) => sum + Number(p.amount), 0);
+    }
+    
     return { ...card, account_type: type, current_balance: calculatedBalance };
   });
 
@@ -227,7 +231,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
+        <section className="col-span-12 lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">7-Day Trend</h2>
             <div className="flex items-center gap-2">
@@ -251,7 +255,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
+        <section className="col-span-12 lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Spending Overview</h2>
           </div>
@@ -270,30 +274,6 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-
-        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Borrow Balance</h2>
-            <div className="flex items-center gap-2">
-               <div className="w-2 h-2 rounded bg-amber-500" />
-               <span className="text-[10px] text-zinc-500 uppercase font-bold">Borrow</span>
-            </div>
-          </div>
-          <div className="h-[180px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={[{ name: 'Borrow', value: purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0) }]}>
-                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px', border: '1px solid #3f3f46' }}
-                  itemStyle={{ color: '#f59e0b', fontWeight: 'bold' }}
-                  labelStyle={{ color: '#71717a', marginBottom: '4px', fontWeight: 'bold' }}
-                  formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Total']}
-                />
-                <Bar dataKey="value" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
