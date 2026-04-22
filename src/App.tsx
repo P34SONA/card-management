@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Toaster, toast } from 'sonner';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { Purchase } from '@/types/database';
 import { Auth } from '@/components/Auth';
 import { Dashboard } from '@/components/Dashboard';
 import { CardList } from '@/components/CardList';
@@ -25,6 +26,8 @@ export default function App() {
   const [currentView, setCurrentView] = useState<'dashboard' | 'cards' | 'logs' | 'tiktok' | 'other'>('dashboard');
   const [globalSearch, setGlobalSearch] = useState('');
   const [showPaidGlobal, setShowPaidGlobal] = useState(false);
+
+  const { cards, purchases, loading: dataLoading, refresh } = useData();
 
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
