@@ -22,18 +22,17 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
   const cardsWithCalculatedBalance = cards.map(card => {
     const cardPurchases = purchases.filter(p => 
       p.card_id === card.id && 
-      p.status === 'pending'
+      p.status === 'pending' &&
+      p.type !== 'other' // User request: "do not add the other expenses total amount to any cards"
     );
     const calculatedBalance = cardPurchases.reduce((sum, p) => sum + Number(p.amount), 0);
     
-    // For credit cards, balance is the accumulation of spending (current_balance = pending spending)
-    // For savings, we treat 'credit_limit' as the reference/total balance, and current_balance as what we've spent/withdrawn
-    
-    // Actually, let's treat it consistently: 'current_balance' field in this component is the ACCUMULATED PENDING spending
-    return { ...card, current_balance: calculatedBalance };
+    // Defensive check for account_type if DB column is missing
+    const type = (card as any).account_type || 'credit';
+    return { ...card, account_type: type, current_balance: calculatedBalance };
   });
 
-  const creditCards = cardsWithCalculatedBalance.filter(c => !c.account_type || c.account_type === 'credit');
+  const creditCards = cardsWithCalculatedBalance.filter(c => c.account_type === 'credit');
   const otherAccounts = cardsWithCalculatedBalance.filter(c => c.account_type && c.account_type !== 'credit');
 
   const totalLimit = creditCards.reduce((acc, card) => acc + Number(card.credit_limit), 0);
@@ -203,7 +202,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        {/* Row 2: TikTok (4), Spending Chart (4), Borrow Distribution (4) */}
+        {/* Row 2: TikTok (4), Spending Chart (4), Borrow Chart (4) */}
         <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">TikTok PayLater</h2>
@@ -213,12 +212,12 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
             {purchases.filter(p => p.type === 'tiktok_paylater' && p.status === 'pending').slice(0, 3).map((p) => (
               <div key={p.id} className="p-3.5 bg-zinc-800/40 border border-zinc-800 rounded-xl hover:bg-zinc-800/60 transition-colors">
                 <div className="flex justify-between items-start mb-1 text-sm font-medium">
-                  <span className="truncate max-w-[120px]">{p.description}</span>
+                  <span className="truncate max-w-[120px] font-bold text-white">{p.description}</span>
                   <span className="font-mono text-white">₱{Number(p.amount).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-zinc-500 uppercase font-bold tracking-tight">
                   <span>Slot {p.current_installment} of {p.installment_count}</span>
-                  <span className={new Date(p.due_date) < new Date() ? "text-red-400" : ""}>Due {format(new Date(p.due_date), 'MMM dd')}</span>
+                  <span className={new Date(p.due_date) < new Date() ? "text-red-400" : ""}> {format(new Date(p.due_date), 'MMM dd')}</span>
                 </div>
               </div>
             ))}
@@ -230,7 +229,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
 
         <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Global Spending</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Spending Overview</h2>
           </div>
           <div className="h-[180px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -253,25 +252,23 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
 
         <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Trend History</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Borrow Balance</h2>
+            <div className="flex items-center gap-2">
+               <div className="w-2 h-2 rounded bg-amber-500" />
+               <span className="text-[10px] text-zinc-500 uppercase font-bold">Borrow</span>
+            </div>
           </div>
           <div className="h-[180px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={lineData}>
+              <BarChart data={[{ name: 'Borrow', value: purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0) }]}>
                 <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
-                  itemStyle={{ color: '#818cf8' }}
-                  formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Amount']}
+                  itemStyle={{ color: '#f59e0b' }}
+                  formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Total']}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="#818cf8" 
-                  strokeWidth={2} 
-                  dot={false}
-                />
-              </LineChart>
+                <Bar dataKey="value" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={40} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </section>
@@ -280,24 +277,27 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
         <section className="col-span-12 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Borrowed Money</h2>
-            <div className="text-right">
-              <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Summary Total</p>
-              <p className="text-xl font-mono font-bold text-indigo-400">₱{purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0).toLocaleString()}</p>
-            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
             {purchases.filter(p => p.type === 'other').map(p => (
-              <div key={p.id} className="flex justify-between items-center p-3 bg-zinc-800/40 border border-zinc-800/50 rounded-2xl hover:bg-zinc-800/60 transition-colors group">
+              <div key={p.id} className="flex justify-between items-center bg-transparent group">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-zinc-200 group-hover:text-white">{p.description}</span>
-                  <span className="text-[10px] text-zinc-500 font-mono uppercase">{format(new Date(p.purchase_date), 'MMM dd')}</span>
+                  <span className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">{p.description}</span>
+                  <span className="text-[10px] text-zinc-500 font-mono uppercase font-bold tracking-wider">{format(new Date(p.purchase_date), 'MMM dd')}</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-indigo-400">₱{Number(p.amount).toLocaleString()}</span>
+                <span className="text-sm font-mono font-bold text-indigo-400 bg-indigo-500/5 px-2 py-1 rounded">₱{Number(p.amount).toLocaleString()}</span>
               </div>
             ))}
             {purchases.filter(p => p.type === 'other').length === 0 && (
               <div className="col-span-full py-10 text-center text-zinc-600 italic text-sm">No borrowed records</div>
             )}
+          </div>
+          
+          <div className="mt-4 pt-6 border-t border-zinc-800/80">
+            <div className="flex flex-col">
+              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-1">Summary Total</p>
+              <p className="text-lg font-mono font-bold text-indigo-400">₱{purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0).toLocaleString()}</p>
+            </div>
           </div>
         </section>
       </div>
