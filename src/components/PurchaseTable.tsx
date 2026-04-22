@@ -53,6 +53,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
   const [category, setCategory] = useState('');
   const [installments, setInstallments] = useState('1');
   const [monthlyAmount, setMonthlyAmount] = useState('');
+  const [balance, setBalance] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -66,6 +67,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
     setCategory('');
     setInstallments('1');
     setMonthlyAmount('');
+    setBalance('');
     setNotes('');
     setEditingPurchase(null);
   };
@@ -81,6 +83,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
     setCategory(p.category || '');
     setInstallments(p.installment_count.toString());
     setMonthlyAmount(p.monthly_amount?.toString() || '');
+    setBalance(p.balance?.toString() || '');
     setNotes(p.notes || '');
     setOpen(true);
   };
@@ -97,6 +100,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
         description,
         amount: parseFloat(amount),
         monthly_amount: parseFloat(monthlyAmount) || null,
+        balance: parseFloat(balance) || (type === 'tiktok_paylater' ? parseFloat(amount) : null),
         purchase_date: format(new Date(), 'yyyy-MM-dd'),
         due_date: format(dueDate, 'yyyy-MM-dd'),
         status,
@@ -150,16 +154,21 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
       const daysInNextMonth = getDaysInMonth(nextMonth);
       const targetDate = setDate(nextMonth, Math.min(30, daysInNextMonth));
 
+      const mAmount = Number(p.monthly_amount || 0);
+      const currentBalance = Number(p.balance || p.amount);
+      const newBalance = Math.max(0, currentBalance - mAmount);
+
       const updates: any = {
-        status: isFinished ? 'paid' : 'pending',
+        status: isFinished || newBalance <= 0 ? 'paid' : 'pending',
         current_installment: isFinished ? p.installment_count : nextInstallment,
-        due_date: isFinished ? p.due_date : format(targetDate, 'yyyy-MM-dd')
+        due_date: isFinished || newBalance <= 0 ? p.due_date : format(targetDate, 'yyyy-MM-dd'),
+        balance: newBalance
       };
 
       try {
         const { error } = await supabase.from('purchases').update(updates).eq('id', p.id);
         if (error) throw error;
-        toast.info(isFinished ? 'Installment finished!' : `Advanced to month ${nextInstallment}`);
+        toast.info(updates.status === 'paid' ? 'TikTok loan fully paid!' : `Advanced to month ${nextInstallment}. Remaining balance: ₱${newBalance.toLocaleString()}`);
         onRefresh();
       } catch (error: any) {
         toast.error(error.message);
@@ -261,27 +270,27 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-1.5">
-                    <Label htmlFor="amount" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">{type === 'tiktok_paylater' ? 'Total Amount' : 'Amount (PHP)'}</Label>
+                    <Label htmlFor="amount" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">{type === 'tiktok_paylater' ? 'Total Amount' : 'Amount (PHP)'}</Label>
                     <Input id="amount" type="number" step="0.01" value={amount} onChange={e => {
                       setAmount(e.target.value);
-                      if (type === 'tiktok_paylater' && installments !== '1') {
+                      if (type === 'tiktok_paylater' && installments !== '1' && !monthlyAmount) {
                         const amt = parseFloat(e.target.value) || 0;
                         const inst = parseInt(installments) || 1;
                         setMonthlyAmount((amt / inst).toFixed(2));
                       }
-                    }} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl" required />
+                    }} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl text-center" required />
                   </div>
                   {type === 'tiktok_paylater' && (
                     <div className="grid gap-1.5">
-                      <Label htmlFor="perMonth" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Per Month</Label>
-                      <Input id="perMonth" type="number" step="0.01" value={monthlyAmount} onChange={e => setMonthlyAmount(e.target.value)} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl" />
+                      <Label htmlFor="perMonth" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Per Month</Label>
+                      <Input id="perMonth" type="number" step="0.01" value={monthlyAmount} onChange={e => setMonthlyAmount(e.target.value)} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl text-center" />
                     </div>
                   )}
                   {type === 'credit_card' && (
                     <div className="grid gap-1.5">
-                      <Label htmlFor="card" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Target Card</Label>
+                      <Label htmlFor="card" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Target Card</Label>
                       <Select value={cardId} onValueChange={setCardId}>
-                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl">
+                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl text-center">
                           <SelectValue placeholder="Select card" />
                         </SelectTrigger>
                         <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
@@ -298,27 +307,34 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                 {type === 'tiktok_paylater' && (
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-1.5">
-                      <Label htmlFor="inst" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Terms (Months)</Label>
+                      <Label htmlFor="inst" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Terms (Months)</Label>
                       <Select value={installments} onValueChange={(val) => {
                         setInstallments(val);
-                        const amt = parseFloat(amount) || 0;
-                        const inst = parseInt(val) || 1;
-                        setMonthlyAmount((amt / inst).toFixed(2));
+                        // Only auto-compute if monthlyAmount is empty
+                        if (!monthlyAmount) {
+                          const amt = parseFloat(amount) || 0;
+                          const inst = parseInt(val) || 1;
+                          setMonthlyAmount((amt / inst).toFixed(2));
+                        }
                         
                         // Set 30th of month
                         const now = new Date();
                         const days = getDaysInMonth(now);
                         setDueDate(setDate(now, Math.min(30, days)));
                       }}>
-                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl font-bold">
+                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl font-bold text-center">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-                          {[1, 3, 6, 12, 24].map(n => (
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => (
                             <SelectItem key={n} value={n.toString()}>{n} Months</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="balance" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Starting Balance</Label>
+                      <Input id="balance" type="number" step="0.01" value={balance} onChange={e => setBalance(e.target.value)} placeholder="If different from total" className="bg-zinc-900 border-zinc-800 rounded-xl text-center" />
                     </div>
                   </div>
                 )}
@@ -358,14 +374,15 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
         <Table>
           <TableHeader className="bg-zinc-950/50">
               <TableRow className="border-zinc-800 hover:bg-transparent">
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 px-6">Description</TableHead>
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Category</TableHead>
-                {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Card</TableHead>}
-                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Terms</TableHead>}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">{type === 'tiktok_paylater' ? 'Total Amount' : 'Amount'}</TableHead>
-                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Per Month</TableHead>}
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 px-6 text-center">Description</TableHead>
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Category</TableHead>
+                {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Card</TableHead>}
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Terms</TableHead>}
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">{type === 'tiktok_paylater' ? 'Total Amount' : 'Amount'}</TableHead>
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Per Month</TableHead>}
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Balance</TableHead>}
                 <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Status</TableHead>
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Payment Due</TableHead>
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Payment Due</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
           </TableHeader>
@@ -379,36 +396,41 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
             ) : (
               filteredPurchases.map((p) => (
                 <TableRow key={p.id} className="border-zinc-800/50 hover:bg-zinc-800/20 transition-colors">
-                  <TableCell className="px-6">
-                    <div className="flex flex-col">
+                  <TableCell className="px-6 text-center">
+                    <div className="flex flex-col items-center">
                       <span className="font-medium text-zinc-100">{p.description}</span>
                       {p.notes && <span className="text-[10px] text-zinc-500 italic truncate max-w-[200px]">{p.notes}</span>}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[9px] uppercase tracking-tighter px-1.5 py-0">
+                  <TableCell className="text-center">
+                    <Badge variant="outline" className="bg-zinc-800 text-zinc-400 border-zinc-700 text-[9px] uppercase tracking-tighter px-1.5 py-0 mx-auto">
                       {p.category || 'Other'}
                     </Badge>
                   </TableCell>
                   {type === 'credit_card' && (
-                    <TableCell className="text-zinc-400 text-xs">
+                    <TableCell className="text-zinc-400 text-xs text-center">
                       {cards.find(c => c.id === p.card_id)?.name || 'Default'}
                     </TableCell>
                   )}
                   {type === 'tiktok_paylater' && (
-                    <TableCell>
-                      <div className="flex flex-col">
+                    <TableCell className="text-center">
+                      <div className="flex flex-col items-center">
                         <span className="text-[10px] font-bold text-white uppercase tracking-tight">Month {p.current_installment}</span>
                         <span className="text-[9px] font-mono text-zinc-500 italic">of {p.installment_count} total</span>
                       </div>
                     </TableCell>
                   )}
-                  <TableCell className="text-right font-bold font-mono text-white">
+                  <TableCell className="text-center font-bold font-mono text-white">
                     ₱{Number(p.amount).toLocaleString()}
                   </TableCell>
                   {type === 'tiktok_paylater' && (
-                    <TableCell className="text-right font-bold font-mono text-indigo-400">
+                    <TableCell className="text-center font-bold font-mono text-indigo-400">
                       ₱{Number(p.monthly_amount || 0).toLocaleString()}
+                    </TableCell>
+                  )}
+                  {type === 'tiktok_paylater' && (
+                    <TableCell className="text-center font-bold font-mono text-emerald-400">
+                      ₱{Number(p.balance ?? p.amount).toLocaleString()}
                     </TableCell>
                   )}
                   <TableCell className="text-center">
@@ -423,11 +445,11 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                       </Badge>
                     </button>
                   </TableCell>
-                  <TableCell className="text-xs text-zinc-400">
+                  <TableCell className="text-center text-xs text-zinc-400">
                     {format(new Date(p.due_date), 'MMM dd, yyyy')}
                   </TableCell>
-                  <TableCell className="text-right pr-6">
-                    <div className="flex justify-end gap-1">
+                  <TableCell className="text-center pr-6">
+                    <div className="flex justify-center gap-1">
                       <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-indigo-500/10 hover:text-indigo-400 text-zinc-500" onClick={() => handleEdit(p)}>
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
