@@ -259,7 +259,9 @@ export function LogTransactionDialog({
                   <Label htmlFor="card" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Target Card</Label>
                   <Select value={cardId} onValueChange={setCardId}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl ">
-                      <SelectValue placeholder="Select card" />
+                      <SelectValue placeholder="Select card">
+                        {cards.find(c => c.id === cardId)?.name}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                       {cards.map(c => (

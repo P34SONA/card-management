@@ -12,17 +12,19 @@ import { Dashboard } from '@/components/Dashboard';
 import { CardList } from '@/components/CardList';
 import { PurchaseTable } from '@/components/PurchaseTable';
 import { Sidebar } from '@/components/Sidebar';
-import { Loader2, Search, Plus } from 'lucide-react';
+import { Loader2, Search, Plus, Filter } from 'lucide-react';
 import { useData } from '@/hooks/useData';
 import { Input } from '@/components/ui/input';
 import { LogTransactionDialog } from '@/components/LogTransactionDialog';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState<'dashboard' | 'cards' | 'logs' | 'tiktok' | 'other'>('dashboard');
   const [globalSearch, setGlobalSearch] = useState('');
+  const [showPaidGlobal, setShowPaidGlobal] = useState(false);
 
   const { cards, purchases, loading: dataLoading, refresh } = useData();
 
@@ -88,11 +90,23 @@ export default function App() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                     <Input 
                       placeholder="Search all registries..." 
-                      className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
+                      className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white h-10"
                       value={globalSearch}
                       onChange={(e) => setGlobalSearch(e.target.value)}
                     />
                   </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowPaidGlobal(!showPaidGlobal)}
+                    className={cn(
+                      "h-10 rounded-xl text-[10px] font-bold uppercase px-4 border border-zinc-800",
+                      showPaidGlobal ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "text-zinc-500"
+                    )}
+                  >
+                    <Filter className="w-3.5 h-3.5 mr-2" />
+                    {showPaidGlobal ? 'Showing Paid' : 'Show Pending'}
+                  </Button>
                   <LogTransactionDialog 
                     cards={cards} 
                     onRefresh={refresh} 
@@ -120,6 +134,7 @@ export default function App() {
                       cards={cards}
                       onRefresh={refresh}
                       externalSearch={globalSearch}
+                      showPaidOnly={showPaidGlobal}
                     />
                   </div>
                 ))}
@@ -139,11 +154,23 @@ export default function App() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                     <Input 
                       placeholder="Search TikTok registry..." 
-                      className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
+                      className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white h-10"
                       value={globalSearch}
                       onChange={(e) => setGlobalSearch(e.target.value)}
                     />
                   </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowPaidGlobal(!showPaidGlobal)}
+                    className={cn(
+                      "h-10 rounded-xl text-[10px] font-bold uppercase px-4 border border-zinc-800",
+                      showPaidGlobal ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "text-zinc-500"
+                    )}
+                  >
+                    <Filter className="w-3.5 h-3.5 mr-2" />
+                    {showPaidGlobal ? 'Showing Paid' : 'Show Pending'}
+                  </Button>
                   <LogTransactionDialog 
                     cards={cards} 
                     onRefresh={refresh} 
@@ -162,6 +189,7 @@ export default function App() {
                 type="tiktok_paylater"
                 onRefresh={refresh}
                 externalSearch={globalSearch}
+                showPaidOnly={showPaidGlobal}
               />
             </div>
           )}
@@ -178,11 +206,23 @@ export default function App() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                     <Input 
                       placeholder="Search expenses..." 
-                      className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
+                      className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white h-10"
                       value={globalSearch}
                       onChange={(e) => setGlobalSearch(e.target.value)}
                     />
                   </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowPaidGlobal(!showPaidGlobal)}
+                    className={cn(
+                      "h-10 rounded-xl text-[10px] font-bold uppercase px-4 border border-zinc-800",
+                      showPaidGlobal ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "text-zinc-500"
+                    )}
+                  >
+                    <Filter className="w-3.5 h-3.5 mr-2" />
+                    {showPaidGlobal ? 'Showing Paid' : 'Show Pending'}
+                  </Button>
                   <LogTransactionDialog 
                     cards={cards} 
                     onRefresh={refresh} 
@@ -201,6 +241,7 @@ export default function App() {
                 type="other"
                 onRefresh={refresh}
                 externalSearch={globalSearch}
+                showPaidOnly={showPaidGlobal}
               />
             </div>
           )}

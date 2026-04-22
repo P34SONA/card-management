@@ -37,12 +37,19 @@ interface PurchaseTableProps {
   cards?: CreditCard[];
   onRefresh: () => void;
   externalSearch?: string;
+  showPaidOnly?: boolean;
 }
 
-export function PurchaseTable({ purchases, type, cards = [], onRefresh, externalSearch = '' }: PurchaseTableProps) {
+export function PurchaseTable({ 
+  purchases, 
+  type, 
+  cards = [], 
+  onRefresh, 
+  externalSearch = '',
+  showPaidOnly = false
+}: PurchaseTableProps) {
   const [open, setOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
-  const [showPaidOnly, setShowPaidOnly] = useState(false);
 
   const handleEdit = (p: Purchase) => {
     setEditingPurchase(p);
@@ -117,34 +124,16 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh, external
     .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime());
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Transaction Registry</h2>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setShowPaidOnly(!showPaidOnly)}
-            className={cn(
-              "h-8 rounded-full text-[10px] font-bold uppercase px-4 border border-zinc-800",
-              showPaidOnly ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "text-zinc-500"
-            )}
-          >
-            <Filter className="w-3 h-3 mr-2" />
-            {showPaidOnly ? 'Showing Paid' : 'Show Pending'}
-          </Button>
-
-          <LogTransactionDialog 
-            open={open} 
-            onOpenChange={(o) => { setOpen(o); if (!o) setEditingPurchase(null); }}
-            cards={cards}
-            onRefresh={onRefresh}
-            editingPurchase={editingPurchase}
-            defaultType={type}
-          />
-        </div>
-      </div>
-
+    <div className="space-y-4">
+      <LogTransactionDialog 
+        open={open} 
+        onOpenChange={(o) => { setOpen(o); if (!o) setEditingPurchase(null); }}
+        cards={cards}
+        onRefresh={onRefresh}
+        editingPurchase={editingPurchase}
+        defaultType={type}
+      />
+      
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
         <Table>
           <TableHeader className="bg-zinc-950/50">
@@ -168,7 +157,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh, external
           <TableBody>
             {filteredPurchases.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={8} className="text-center py-20 text-zinc-600 italic text-sm">
+                <TableCell colSpan={15} className="text-center py-20 text-zinc-600 italic text-sm">
                   Registry is currently empty or no matches found.
                 </TableCell>
               </TableRow>
