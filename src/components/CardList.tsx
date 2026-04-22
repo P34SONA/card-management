@@ -206,7 +206,7 @@ export function CardList({ cards, onRefresh }: CardListProps) {
               <div className="space-y-2">
                 <div className="flex justify-between text-[11px] font-medium tracking-tight">
                   <span className="text-zinc-500">Utilization Registry</span>
-                  <span className="text-zinc-300 font-bold font-mono">${Number(card.current_balance).toLocaleString()} <span className="text-zinc-500 font-normal">/ ${Number(card.credit_limit).toLocaleString()}</span></span>
+                  <span className="text-zinc-300 font-bold font-mono">₱{Number(card.current_balance).toLocaleString()} <span className="text-zinc-500 font-normal">/ ₱{Number(card.credit_limit).toLocaleString()}</span></span>
                 </div>
                 <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden p-[1px] border border-zinc-800">
                   <div 

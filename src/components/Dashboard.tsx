@@ -54,7 +54,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
             <div className="flex gap-2">
                <div className="text-right">
                   <p className="text-[10px] text-zinc-500 uppercase font-bold">Total Utilization</p>
-                  <p className="text-lg font-bold text-white">${totalBalance.toLocaleString()} <span className="text-xs text-zinc-500 font-normal">/ ${totalLimit.toLocaleString()}</span></p>
+                  <p className="text-lg font-bold text-white">₱{totalBalance.toLocaleString()} <span className="text-xs text-zinc-500 font-normal">/ ₱{totalLimit.toLocaleString()}</span></p>
                </div>
             </div>
           </div>
@@ -76,7 +76,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                 </div>
                 <div className="relative z-10">
                   <p className="text-[10px] text-zinc-500 mb-0.5 uppercase tracking-tighter">{card.name}</p>
-                  <p className="text-2xl font-bold text-white">${Number(card.current_balance).toLocaleString()} <span className="text-xs text-zinc-500 font-normal tracking-normal">/ ${Number(card.credit_limit).toLocaleString()}</span></p>
+                  <p className="text-2xl font-bold text-white">₱{Number(card.current_balance).toLocaleString()} <span className="text-xs text-zinc-500 font-normal tracking-normal">/ ₱{Number(card.credit_limit).toLocaleString()}</span></p>
                   <div className="mt-2 h-1 w-full bg-white/5 rounded-full overflow-hidden">
                     <div 
                       className="h-full rounded-full transition-all duration-1000" 
@@ -108,7 +108,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
               <div key={p.id} className="p-3.5 bg-zinc-800/40 border border-zinc-800 rounded-xl hover:bg-zinc-800/60 transition-colors">
                 <div className="flex justify-between items-start mb-1 text-sm font-medium">
                   <span className="truncate max-w-[120px]">{p.description}</span>
-                  <span className="font-mono text-white">${Number(p.amount).toLocaleString()}</span>
+                  <span className="font-mono text-white">₱{Number(p.amount).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center text-[10px] text-zinc-500 uppercase font-bold tracking-tight">
                   <span>Slot {p.current_installment} of {p.installment_count}</span>
@@ -154,14 +154,14 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                   <span className="text-sm font-medium text-zinc-200 group-hover:text-white">{p.description}</span>
                   <span className="text-[10px] text-zinc-500 font-mono uppercase">{format(new Date(p.purchase_date), 'MMM dd')}</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-indigo-400">${Number(p.amount).toLocaleString()}</span>
+                <span className="text-xs font-mono font-bold text-indigo-400">₱{Number(p.amount).toLocaleString()}</span>
               </div>
             ))}
           </div>
           <div className="pt-4 border-t border-zinc-800/60 mt-auto">
             <div className="flex justify-between text-[11px] font-bold tracking-widest text-zinc-400">
               <span>SUMMARY TOTAL</span>
-              <span className="text-indigo-400 font-mono">${purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0).toLocaleString()}</span>
+              <span className="text-indigo-400 font-mono">₱{purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0).toLocaleString()}</span>
             </div>
           </div>
         </section>

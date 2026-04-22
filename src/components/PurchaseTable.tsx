@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Calendar as CalIcon, Filter, MoreVertical, CreditCard as CardIcon, ShoppingBag, Wallet } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar as CalIcon, Filter, Search, CreditCard as CardIcon, ShoppingBag, Wallet } from 'lucide-react';
 import { format, addMonths } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -40,6 +40,8 @@ interface PurchaseTableProps {
 export function PurchaseTable({ purchases, type, cards = [], onRefresh }: PurchaseTableProps) {
   const [open, setOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cardFilter, setCardFilter] = useState<string>('all');
   
   // Form State
   const [description, setDescription] = useState('');
@@ -50,6 +52,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
   const [status, setStatus] = useState<PurchaseStatus>('pending');
   const [category, setCategory] = useState('');
   const [installments, setInstallments] = useState('1');
+  const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
@@ -61,6 +64,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
     setStatus('pending');
     setCategory('');
     setInstallments('1');
+    setNotes('');
     setEditingPurchase(null);
   };
 
@@ -74,6 +78,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
     setStatus(p.status);
     setCategory(p.category || '');
     setInstallments(p.installment_count.toString());
+    setNotes(p.notes || '');
     setOpen(true);
   };
 
@@ -88,12 +93,13 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
         user_id: user.id,
         description,
         amount: parseFloat(amount),
-        purchase_date: format(purchaseDate, 'yyyy-MM-dd'),
+        purchase_date: format(new Date(), 'yyyy-MM-dd'), // Automatically set to current date
         due_date: format(dueDate, 'yyyy-MM-dd'),
         status,
         category,
         type,
         card_id: cardId === 'none' ? null : cardId,
+        notes,
       };
 
       if (editingPurchase) {
@@ -179,8 +185,46 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
     }
   };
 
+  const filteredPurchases = purchases
+    .filter(p => {
+      const matchesSearch = p.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (p.notes && p.notes.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                          (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCard = cardFilter === 'all' || p.card_id === cardFilter;
+      return matchesSearch && matchesCard;
+    })
+    .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime());
+
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <Input 
+            placeholder="Search registry..." 
+            className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Card Filter */}
+        {type === 'credit_card' && (
+          <Select value={cardFilter} onValueChange={setCardFilter}>
+            <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl">
+              <SelectValue placeholder="All Cards" />
+            </SelectTrigger>
+            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+              <SelectItem value="all">All Cards Registry</SelectItem>
+              {cards.map(c => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
       <div className="flex justify-between items-center bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
         <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Transaction Registry</h2>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
@@ -190,13 +234,12 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
               NEW LOG
             </Button>
           </DialogTrigger>
-          {/* ... DialogContent remains mostly same but styled ... */}
           <DialogContent className="max-w-md bg-zinc-950 border-zinc-800 text-white rounded-3xl">
              <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle className="text-xl font-bold">Log Purchase</DialogTitle>
+                <DialogTitle className="text-xl font-bold">Log Transaction</DialogTitle>
                 <DialogDescription className="text-zinc-500 text-xs">
-                  Record transaction details for your records.
+                  Record details for your financial engine.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-6">
@@ -204,11 +247,28 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                   <Label htmlFor="desc" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Description</Label>
                   <Input id="desc" value={description} onChange={e => setDescription(e.target.value)} placeholder="e.g. Starbucks" className="bg-zinc-900 border-zinc-800 rounded-xl" required />
                 </div>
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-1.5">
-                    <Label htmlFor="amount" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Amount</Label>
+                    <Label htmlFor="amount" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Amount (PHP)</Label>
                     <Input id="amount" type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl" required />
                   </div>
+                  {type === 'credit_card' && (
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="card" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Target Card</Label>
+                      <Select value={cardId} onValueChange={setCardId}>
+                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl">
+                          <SelectValue placeholder="Select card" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                          <SelectItem value="none">Default Balance</SelectItem>
+                          {cards.map(c => (
+                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   {type === 'tiktok_paylater' && (
                     <div className="grid gap-1.5">
                       <Label htmlFor="inst" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Installments</Label>
@@ -224,23 +284,8 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                       </Select>
                     </div>
                   )}
-                  {type === 'credit_card' && (
-                    <div className="grid gap-1.5">
-                      <Label htmlFor="card" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Card</Label>
-                      <Select value={cardId} onValueChange={setCardId}>
-                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl">
-                          <SelectValue placeholder="Select card" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-                          {cards.map(c => (
-                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
                 </div>
-                {/* ... other date fields ... */}
+
                 <div className="grid grid-cols-2 gap-4">
                    <div className="grid gap-1.5">
                     <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Status</Label>
@@ -255,24 +300,35 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                     </Select>
                   </div>
                    <div className="grid gap-1.5">
-                    <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Purchase Date</Label>
+                    <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Payment Date</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="bg-zinc-900 border-zinc-800 rounded-xl text-xs justify-start h-10">
                           <CalIcon className="mr-2 h-3.5 w-3.5 text-zinc-500" />
-                          {purchaseDate ? format(purchaseDate, 'MMM d, yyyy') : <span>Pick a date</span>}
+                          {dueDate ? format(dueDate, 'MMM d, yyyy') : <span>Pick a date</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-zinc-950 border-zinc-800">
-                        <Calendar mode="single" selected={purchaseDate} onSelect={(d) => d && setPurchaseDate(d)} className="bg-zinc-950 text-white" />
+                        <Calendar mode="single" selected={dueDate} onSelect={(d) => d && setDueDate(d)} className="bg-zinc-950 text-white" />
                       </PopoverContent>
                     </Popover>
                   </div>
                 </div>
+
+                <div className="grid gap-1.5">
+                  <Label htmlFor="notes" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Transaction Notes</Label>
+                  <Input 
+                    id="notes" 
+                    value={notes} 
+                    onChange={e => setNotes(e.target.value)} 
+                    placeholder="Enter additional details..." 
+                    className="bg-zinc-900 border-zinc-800 rounded-xl"
+                  />
+                </div>
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl h-11 font-bold">
-                  {loading ? 'Processing...' : editingPurchase ? 'Update Registry' : 'Commit Purchase'}
+                  {loading ? 'Processing...' : editingPurchase ? 'Update Registry' : 'Commit Registry'}
                 </Button>
               </DialogFooter>
             </form>
@@ -289,25 +345,25 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
               {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Card</TableHead>}
               {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Slot</TableHead>}
               <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Amount</TableHead>
-              <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Paying Date</TableHead>
-              <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Status</TableHead>
+              <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Status</TableHead>
+              <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Payment Due</TableHead>
               <TableHead className="w-[100px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {purchases.length === 0 ? (
+            {filteredPurchases.length === 0 ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={8} className="text-center py-20 text-zinc-600 italic text-sm">
-                  Registry is currently empty.
+                  Registry is currently empty or no matches found.
                 </TableCell>
               </TableRow>
             ) : (
-              purchases.map((p) => (
+              filteredPurchases.map((p) => (
                 <TableRow key={p.id} className="border-zinc-800/50 hover:bg-zinc-800/20 transition-colors">
                   <TableCell className="px-6">
                     <div className="flex flex-col">
                       <span className="font-medium text-zinc-100">{p.description}</span>
-                      <span className="text-[10px] text-zinc-500 font-mono italic">{format(new Date(p.purchase_date), 'MMM dd, yyyy')}</span>
+                      {p.notes && <span className="text-[10px] text-zinc-500 italic truncate max-w-[200px]">{p.notes}</span>}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -317,7 +373,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                   </TableCell>
                   {type === 'credit_card' && (
                     <TableCell className="text-zinc-400 text-xs">
-                      {cards.find(c => c.id === p.card_id)?.name || 'N/A'}
+                      {cards.find(c => c.id === p.card_id)?.name || 'Default'}
                     </TableCell>
                   )}
                   {type === 'tiktok_paylater' && (
@@ -326,12 +382,9 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                     </TableCell>
                   )}
                   <TableCell className="text-right font-bold font-mono text-white">
-                    ${Number(p.amount).toLocaleString()}
+                    ₱{Number(p.amount).toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-xs text-zinc-400">
-                    {format(new Date(p.due_date), 'MMM dd')}
-                  </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
                     <button onClick={() => toggleStatus(p)}>
                       <Badge className={cn(
                         "cursor-pointer text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border transition-all",
@@ -342,6 +395,9 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                         {p.status}
                       </Badge>
                     </button>
+                  </TableCell>
+                  <TableCell className="text-xs text-zinc-400">
+                    {format(new Date(p.due_date), 'MMM dd, yyyy')}
                   </TableCell>
                   <TableCell className="text-right pr-6">
                     <div className="flex justify-end gap-1">
