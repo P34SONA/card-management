@@ -28,6 +28,7 @@ interface LogTransactionDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
+  hideTrigger?: boolean;
 }
 
 export function LogTransactionDialog({ 
@@ -37,7 +38,8 @@ export function LogTransactionDialog({
   editingPurchase = null,
   open: externalOpen,
   onOpenChange: externalOnOpenChange,
-  trigger
+  trigger,
+  hideTrigger = false
 }: LogTransactionDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -150,7 +152,7 @@ export function LogTransactionDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      {!trigger && !externalOpen && (
+      {!trigger && !externalOpen && !hideTrigger && (
         <DialogTrigger asChild>
           <Button className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-8 px-4">
             <Plus className="w-3.5 h-3.5" />

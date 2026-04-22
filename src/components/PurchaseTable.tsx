@@ -36,6 +36,7 @@ interface PurchaseTableProps {
   type: PurchaseType;
   cards?: CreditCard[];
   onRefresh: () => void;
+  onEdit: (p: Purchase) => void;
   externalSearch?: string;
   showPaidOnly?: boolean;
 }
@@ -45,6 +46,7 @@ export function PurchaseTable({
   type, 
   cards = [], 
   onRefresh, 
+  onEdit,
   externalSearch = '',
   showPaidOnly = false
 }: PurchaseTableProps) {
@@ -52,11 +54,8 @@ export function PurchaseTable({
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
 
   const handleEdit = (p: Purchase) => {
-    setEditingPurchase(p);
-    setOpen(true);
+    onEdit(p);
   };
-
-
 
   const handleDelete = async (id: string) => {
     if (!confirm('Permanent delete?')) return;
@@ -71,9 +70,8 @@ export function PurchaseTable({
   };
 
   const toggleStatus = async (p: Purchase) => {
-    if (type === 'tiktok_paylater' && (p.status === 'pending' || p.status === 'unpaid' as any)) {
+    if (type === 'tiktok_paylater' && p.status !== 'paid') {
       const nextInstallment = p.current_installment + 1;
-      const isFinished = nextInstallment >= p.installment_count;
       
       const nextDueDate = new Date(p.due_date);
       const nextMonth = addMonths(nextDueDate, 1);
@@ -114,7 +112,7 @@ export function PurchaseTable({
 
   const filteredPurchases = purchases
     .filter(p => {
-      const query = externalSearch.toLowerCase();
+      const query = (externalSearch || '').toLowerCase();
       const matchesSearch = p.description.toLowerCase().includes(query) || 
                           (p.notes && p.notes.toLowerCase().includes(query)) ||
                           (p.category && p.category.toLowerCase().includes(query));
@@ -124,18 +122,8 @@ export function PurchaseTable({
     .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime());
 
   return (
-    <div className="space-y-4">
-      <LogTransactionDialog 
-        open={open} 
-        onOpenChange={(o) => { setOpen(o); if (!o) setEditingPurchase(null); }}
-        cards={cards}
-        onRefresh={onRefresh}
-        editingPurchase={editingPurchase}
-        defaultType={type}
-      />
-      
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
-        <Table>
+    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
+      <Table>
           <TableHeader className="bg-zinc-950/50">
               <TableRow className="border-zinc-800 hover:bg-transparent">
                 <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 px-6 text-center">{type === 'tiktok_paylater' ? 'Name' : 'Description'}</TableHead>
@@ -268,6 +256,5 @@ export function PurchaseTable({
           </TableBody>
         </Table>
       </div>
-    </div>
-  );
+    );
 }

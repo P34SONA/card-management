@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, Purchase } from '@/types/database';
-import { CreditCard as CardIcon, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { CreditCard as CardIcon, DollarSign, TrendingUp, AlertCircle, RefreshCcw } from 'lucide-react';
+import { format, subDays, isSameDay } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 
 interface DashboardProps {
   cards: CreditCard[];
@@ -13,6 +14,8 @@ interface DashboardProps {
 }
 
 export function Dashboard({ cards, purchases, loading }: DashboardProps) {
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+
   // Calculate dynamic balance for each card based on pending purchases
   const cardsWithCalculatedBalance = cards.map(card => {
     const cardPurchases = purchases.filter(p => p.card_id === card.id && p.status === 'pending');
@@ -22,23 +25,14 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
 
   const totalLimit = cardsWithCalculatedBalance.reduce((acc, card) => acc + Number(card.credit_limit), 0);
   const totalBalance = cardsWithCalculatedBalance.reduce((acc, card) => acc + Number(card.current_balance), 0);
-  const utilization = totalLimit > 0 ? (totalBalance / totalLimit) * 100 : 0;
-
+  
   const thisMonthPurchases = purchases.filter(p => {
     const d = new Date(p.purchase_date);
     const now = new Date();
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   });
 
-  const monthlySpend = thisMonthPurchases.reduce((acc, p) => acc + Number(p.amount), 0);
-
   const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#3b82f6'];
-
-  const pieData = cardsWithCalculatedBalance.map(card => ({
-    name: card.name,
-    value: Number(card.current_balance),
-    color: card.color
-  })).filter(d => d.value > 0);
 
   // Group purchases by categories for basic analytics
   const categoryData = thisMonthPurchases.reduce((acc: any, p) => {
@@ -48,6 +42,26 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
   }, {});
 
   const barData = Object.entries(categoryData).map(([name, value]) => ({ name, value }));
+
+  // Date-based data for line chart
+  const getLast7DaysData = () => {
+    const days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i)).reverse();
+    return days.map(day => {
+      const dayPurchases = purchases.filter(p => {
+        const purchaseDate = new Date(p.purchase_date);
+        const matchesDay = isSameDay(purchaseDate, day);
+        const matchesCard = selectedCardId ? p.card_id === selectedCardId : true;
+        return matchesDay && matchesCard;
+      });
+      return {
+        name: format(day, 'MMM dd'),
+        value: dayPurchases.reduce((sum, p) => sum + Number(p.amount), 0)
+      };
+    });
+  };
+
+  const lineData = getLast7DaysData();
+  const selectedCard = cards.find(c => c.id === selectedCardId);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
@@ -61,7 +75,16 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
         <section className="col-span-12 lg:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Active Credit Cards</h2>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-4">
+               {selectedCardId && (
+                 <button 
+                   onClick={() => setSelectedCardId(null)}
+                   className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold uppercase flex items-center gap-1.5 transition-colors"
+                 >
+                   <RefreshCcw className="w-3 h-3" />
+                   Reset View
+                 </button>
+               )}
                <div className="text-right">
                   <p className="text-[10px] text-zinc-500 uppercase font-bold">Total Utilization</p>
                   <p className="text-lg font-bold text-white">₱{totalBalance.toLocaleString()} <span className="text-xs text-zinc-500 font-normal">/ ₱{totalLimit.toLocaleString()}</span></p>
@@ -73,10 +96,14 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
             {cardsWithCalculatedBalance.slice(0, 4).map((card) => (
               <div 
                 key={card.id} 
-                className="h-36 p-5 rounded-2xl border relative overflow-hidden flex flex-col justify-between transition-transform hover:scale-[1.02]"
+                onClick={() => setSelectedCardId(card.id)}
+                className={cn(
+                  "h-36 p-5 rounded-2xl border relative overflow-hidden flex flex-col justify-between transition-all cursor-pointer",
+                  selectedCardId === card.id ? "ring-2 ring-indigo-500 scale-[1.02] z-20 shadow-xl" : "hover:scale-[1.02] opacity-80 hover:opacity-100"
+                )}
                 style={{ 
                   background: `linear-gradient(135deg, ${card.color}22, #18181b)`,
-                  borderColor: `${card.color}33`
+                  borderColor: selectedCardId === card.id ? card.color : `${card.color}33`
                 }}
               >
                 <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full blur-3xl opacity-20" style={{ backgroundColor: card.color }}></div>
@@ -142,17 +169,44 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        {/* Recent Purchases - Span 8 */}
-        <section className="col-span-12 lg:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Recent Logs</h2>
-            <div className="h-[300px] w-full hidden md:block mt-4">
-              <ResponsiveContainer width="100%" height="100%">
+        {/* Chart Section - Span 8 */}
+        <section className="col-span-12 lg:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+               {selectedCardId ? `${selectedCard?.name} Spending Trend` : 'Global Spending Overview'}
+            </h2>
+            {selectedCardId && (
+              <Badge style={{ backgroundColor: selectedCard?.color + '22', color: selectedCard?.color, borderColor: selectedCard?.color + '44' }} variant="line" className="text-[10px] uppercase font-bold px-2 py-0.5 rounded">
+                Last 7 Days
+              </Badge>
+            )}
+          </div>
+          <div className="h-[240px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              {selectedCardId ? (
+                <LineChart data={lineData}>
+                  <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
+                    itemStyle={{ color: selectedCard?.color }}
+                    formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Amount']}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke={selectedCard?.color} 
+                    strokeWidth={3} 
+                    dot={{ r: 4, fill: selectedCard?.color, strokeWidth: 0 }} 
+                    activeDot={{ r: 6, strokeWidth: 0 }}
+                  />
+                </LineChart>
+              ) : (
                 <BarChart data={barData.slice(0, 5)}>
                   <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
                     itemStyle={{ color: '#818cf8' }}
+                    formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Amount']}
                   />
                   <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={20}>
                     {barData.map((entry, index) => (
@@ -160,8 +214,8 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                     ))}
                   </Bar>
                 </BarChart>
-              </ResponsiveContainer>
-            </div>
+              )}
+            </ResponsiveContainer>
           </div>
         </section>
 

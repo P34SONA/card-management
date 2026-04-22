@@ -26,7 +26,19 @@ export default function App() {
   const [globalSearch, setGlobalSearch] = useState('');
   const [showPaidGlobal, setShowPaidGlobal] = useState(false);
 
-  const { cards, purchases, loading: dataLoading, refresh } = useData();
+  const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const refreshWithClose = () => {
+    refresh();
+    setIsDialogOpen(false);
+    setEditingPurchase(null);
+  };
+
+  const handleEditPurchase = (p: Purchase) => {
+    setEditingPurchase(p);
+    setIsDialogOpen(true);
+  };
 
   const getTargetType = () => {
     if (currentView === 'tiktok') return 'tiktok_paylater';
@@ -68,6 +80,16 @@ export default function App() {
     <div className="flex min-h-screen bg-zinc-950 font-sans selection:bg-indigo-500/30">
       <Sidebar currentView={currentView} onViewChange={setCurrentView} onLogout={() => supabase.auth.signOut()} />
       
+      <LogTransactionDialog 
+        open={isDialogOpen} 
+        onOpenChange={setIsDialogOpen}
+        cards={cards} 
+        onRefresh={refreshWithClose} 
+        editingPurchase={editingPurchase}
+        defaultType={getTargetType()}
+        hideTrigger
+      />
+
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         <div className="max-w-7xl mx-auto space-y-12">
           {currentView === 'dashboard' && (
@@ -107,17 +129,16 @@ export default function App() {
                     <Filter className="w-3.5 h-3.5 mr-2" />
                     {showPaidGlobal ? 'Showing Paid' : 'Show Pending'}
                   </Button>
-                  <LogTransactionDialog 
-                    cards={cards} 
-                    onRefresh={refresh} 
-                    defaultType="credit_card"
-                    trigger={
-                      <Button className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg">
-                        <Plus className="w-4 h-4" />
-                        NEW LOG
-                      </Button>
-                    }
-                  />
+                  <Button 
+                    className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg"
+                    onClick={() => {
+                      setEditingPurchase(null);
+                      setIsDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    NEW LOG
+                  </Button>
                 </div>
               </header>
               
@@ -135,6 +156,7 @@ export default function App() {
                       onRefresh={refresh}
                       externalSearch={globalSearch}
                       showPaidOnly={showPaidGlobal}
+                      onEdit={handleEditPurchase}
                     />
                   </div>
                 ))}
@@ -171,17 +193,16 @@ export default function App() {
                     <Filter className="w-3.5 h-3.5 mr-2" />
                     {showPaidGlobal ? 'Showing Paid' : 'Show Pending'}
                   </Button>
-                  <LogTransactionDialog 
-                    cards={cards} 
-                    onRefresh={refresh} 
-                    defaultType="tiktok_paylater"
-                    trigger={
-                      <Button className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg">
-                        <Plus className="w-4 h-4" />
-                        NEW LOG
-                      </Button>
-                    }
-                  />
+                  <Button 
+                    className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg"
+                    onClick={() => {
+                      setEditingPurchase(null);
+                      setIsDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    NEW LOG
+                  </Button>
                 </div>
               </header>
               <PurchaseTable 
@@ -190,6 +211,7 @@ export default function App() {
                 onRefresh={refresh}
                 externalSearch={globalSearch}
                 showPaidOnly={showPaidGlobal}
+                onEdit={handleEditPurchase}
               />
             </div>
           )}
@@ -223,17 +245,16 @@ export default function App() {
                     <Filter className="w-3.5 h-3.5 mr-2" />
                     {showPaidGlobal ? 'Showing Paid' : 'Show Pending'}
                   </Button>
-                  <LogTransactionDialog 
-                    cards={cards} 
-                    onRefresh={refresh} 
-                    defaultType="other"
-                    trigger={
-                      <Button className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg">
-                        <Plus className="w-4 h-4" />
-                        NEW LOG
-                      </Button>
-                    }
-                  />
+                  <Button 
+                    className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg"
+                    onClick={() => {
+                      setEditingPurchase(null);
+                      setIsDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    NEW LOG
+                  </Button>
                 </div>
               </header>
               <PurchaseTable 
@@ -242,6 +263,7 @@ export default function App() {
                 onRefresh={refresh}
                 externalSearch={globalSearch}
                 showPaidOnly={showPaidGlobal}
+                onEdit={handleEditPurchase}
               />
             </div>
           )}
