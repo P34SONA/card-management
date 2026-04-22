@@ -206,32 +206,8 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        {/* Row 2: TikTok (4), Spending Chart (4), Borrow Chart (4) */}
-        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">TikTok PayLater</h2>
-            <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 text-[10px] uppercase font-bold">Installments</Badge>
-          </div>
-          <div className="space-y-3">
-            {purchases.filter(p => p.type === 'tiktok_paylater' && p.status === 'pending').map((p) => (
-              <div key={p.id} className="p-3.5 bg-zinc-800/40 border border-zinc-800 rounded-xl hover:bg-zinc-800/60 transition-colors">
-                <div className="flex justify-between items-start mb-1 text-sm font-medium">
-                  <span className="truncate max-w-[120px] font-bold text-white">{p.description}</span>
-                  <span className="font-mono text-white">₱{Number(p.amount).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center text-[10px] text-zinc-500 uppercase font-bold tracking-tight">
-                  <span>Slot {p.current_installment} of {p.installment_count}</span>
-                  <span className={new Date(p.due_date) < new Date() ? "text-red-400" : ""}> {format(new Date(p.due_date), 'MMM dd')}</span>
-                </div>
-              </div>
-            ))}
-            {purchases.filter(p => p.type === 'tiktok_paylater' && p.status === 'pending').length === 0 && (
-              <div className="text-center py-8 text-zinc-600 italic text-sm">No active paylater logs</div>
-            )}
-          </div>
-        </section>
-
-        <section className="col-span-12 lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
+        {/* Row 2: Charts Row */}
+        <section className="col-span-12 lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col shadow-xl">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">7-Day Trend</h2>
             <div className="flex items-center gap-2">
@@ -239,7 +215,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                <span className="text-[10px] text-zinc-500 uppercase font-bold">Daily Spend</span>
             </div>
           </div>
-          <div className="h-[180px] w-full">
+          <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={lineData}>
                 <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
@@ -255,11 +231,11 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        <section className="col-span-12 lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
+        <section className="col-span-12 lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col shadow-xl">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Spending Overview</h2>
           </div>
-          <div className="h-[180px] w-full">
+          <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barData.slice(0, 5)}>
                 <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
@@ -279,16 +255,40 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        {/* Row 3: Borrowed Money Full List (12) */}
-        <section className="col-span-12 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
+        {/* Row 3: Registry Row */}
+        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-xl">
           <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Borrowed Money</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Scheduled Installments</h2>
+            <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 text-[10px] uppercase font-bold">Installments</Badge>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
+          <div className="space-y-3">
+            {purchases.filter(p => p.type === 'tiktok_paylater' && p.status === 'pending').map((p) => (
+              <div key={p.id} className="p-3.5 bg-zinc-800/40 border border-zinc-800 rounded-xl hover:bg-zinc-800/60 transition-colors">
+                <div className="flex justify-between items-start mb-1 text-sm font-medium">
+                  <span className="truncate max-w-[120px] font-bold text-white uppercase tracking-tight text-xs">{p.description}</span>
+                  <span className="font-mono text-white text-xs">₱{Number(p.amount).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center text-[9px] text-zinc-500 uppercase font-bold tracking-tight">
+                  <span>Slot {p.current_installment} of {p.installment_count}</span>
+                  <span className={new Date(p.due_date) < new Date() ? "text-red-400" : ""}> {format(new Date(p.due_date), 'MMM dd')}</span>
+                </div>
+              </div>
+            ))}
+            {purchases.filter(p => p.type === 'tiktok_paylater' && p.status === 'pending').length === 0 && (
+              <div className="text-center py-8 text-zinc-600 italic text-sm">No active installments</div>
+            )}
+          </div>
+        </section>
+
+        <section className="col-span-12 lg:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-xl">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Borrowed Money Summary</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
             {purchases.filter(p => p.type === 'other').map(p => (
               <div key={p.id} className="flex justify-between items-center bg-transparent group">
                 <div className="flex flex-col">
-                  <span className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">{p.description}</span>
+                  <span className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors tracking-tight">{p.description}</span>
                   <span className="text-[10px] text-zinc-500 font-mono uppercase font-bold tracking-wider">{format(new Date(p.purchase_date), 'MMM dd')}</span>
                 </div>
                 <span className="text-sm font-mono font-bold text-indigo-400 bg-indigo-500/5 px-2 py-1 rounded">₱{Number(p.amount).toLocaleString()}</span>
@@ -298,12 +298,12 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
               <div className="col-span-full py-10 text-center text-zinc-600 italic text-sm">No borrowed records</div>
             )}
           </div>
-          
-          <div className="mt-4 pt-6 border-t border-zinc-800/80">
-            <div className="flex flex-col">
-              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-1">Summary Total</p>
+          <div className="mt-auto pt-4 border-t border-zinc-800/80 flex justify-between items-end">
+            <div>
+              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-1">Total Borrowed</p>
               <p className="text-lg font-mono font-bold text-indigo-400">₱{purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0).toLocaleString()}</p>
             </div>
+            <p className="text-[9px] text-zinc-600 uppercase font-bold italic">Auto-calculated from other expenses</p>
           </div>
         </section>
       </div>

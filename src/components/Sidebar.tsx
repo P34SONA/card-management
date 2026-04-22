@@ -13,7 +13,7 @@ export function Sidebar({ currentView, onViewChange, onLogout }: SidebarProps) {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'cards', label: 'Linked Cards', icon: CardIcon },
     { id: 'logs', label: 'Purchase Logs', icon: ScrollText },
-    { id: 'tiktok', label: 'TikTok Paylater', icon: ShoppingBag },
+    { id: 'tiktok', label: 'Installments', icon: ShoppingBag },
     { id: 'other', label: 'Other Expenses', icon: Wallet },
   ];
 

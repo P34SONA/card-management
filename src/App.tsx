@@ -80,7 +80,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-950 font-sans selection:bg-indigo-500/30">
+    <div className="flex min-h-screen bg-zinc-950 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-900/10 via-zinc-950 to-zinc-950 font-sans selection:bg-indigo-500/30">
       <Sidebar currentView={currentView} onViewChange={setCurrentView} onLogout={() => supabase.auth.signOut()} />
       
       <LogTransactionDialog 
@@ -176,14 +176,14 @@ export default function App() {
             <div className="space-y-6">
               <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-1">
-                  <h1 className="text-3xl font-bold tracking-tight text-white">TikTok Paylater</h1>
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Installments</h1>
                   <p className="text-sm text-zinc-500 tracking-wide">Manage your micro-installments and monthly payments.</p>
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto">
                   <div className="relative w-full md:w-96">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                     <Input 
-                      placeholder="Search TikTok registry..." 
+                      placeholder="Search installments..." 
                       className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white h-10"
                       value={globalSearch}
                       onChange={(e) => setGlobalSearch(e.target.value)}
