@@ -12,8 +12,15 @@ interface DashboardProps {
 }
 
 export function Dashboard({ cards, purchases, loading }: DashboardProps) {
-  const totalLimit = cards.reduce((acc, card) => acc + Number(card.credit_limit), 0);
-  const totalBalance = cards.reduce((acc, card) => acc + Number(card.current_balance), 0);
+  // Calculate dynamic balance for each card based on pending purchases
+  const cardsWithCalculatedBalance = cards.map(card => {
+    const cardPurchases = purchases.filter(p => p.card_id === card.id && p.status === 'pending');
+    const calculatedBalance = cardPurchases.reduce((sum, p) => sum + Number(p.amount), 0);
+    return { ...card, current_balance: calculatedBalance };
+  });
+
+  const totalLimit = cardsWithCalculatedBalance.reduce((acc, card) => acc + Number(card.credit_limit), 0);
+  const totalBalance = cardsWithCalculatedBalance.reduce((acc, card) => acc + Number(card.current_balance), 0);
   const utilization = totalLimit > 0 ? (totalBalance / totalLimit) * 100 : 0;
 
   const thisMonthPurchases = purchases.filter(p => {
@@ -24,7 +31,9 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
 
   const monthlySpend = thisMonthPurchases.reduce((acc, p) => acc + Number(p.amount), 0);
 
-  const pieData = cards.map(card => ({
+  const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#3b82f6'];
+
+  const pieData = cardsWithCalculatedBalance.map(card => ({
     name: card.name,
     value: Number(card.current_balance),
     color: card.color
@@ -60,7 +69,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {cards.slice(0, 2).map((card) => (
+            {cardsWithCalculatedBalance.slice(0, 4).map((card) => (
               <div 
                 key={card.id} 
                 className="h-36 p-5 rounded-2xl border relative overflow-hidden flex flex-col justify-between transition-transform hover:scale-[1.02]"
@@ -75,7 +84,10 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                   <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-white/5 rounded border border-white/10">{card.bank_name || 'BANK'}</span>
                 </div>
                 <div className="relative z-10">
-                  <p className="text-[10px] text-zinc-500 mb-0.5 uppercase tracking-tighter">{card.name}</p>
+                  <div className="flex justify-between items-end mb-0.5">
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">{card.name}</p>
+                    <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-tighter">Available: ₱{(Number(card.credit_limit) - Number(card.current_balance)).toLocaleString()}</p>
+                  </div>
                   <p className="text-2xl font-bold text-white">₱{Number(card.current_balance).toLocaleString()} <span className="text-xs text-zinc-500 font-normal tracking-normal">/ ₱{Number(card.credit_limit).toLocaleString()}</span></p>
                   <div className="mt-2 h-1 w-full bg-white/5 rounded-full overflow-hidden">
                     <div 
@@ -134,7 +146,11 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
                     itemStyle={{ color: '#818cf8' }}
                   />
-                  <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={20} />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={20}>
+                    {barData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
