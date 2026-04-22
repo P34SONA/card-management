@@ -22,16 +22,25 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
   const cardsWithCalculatedBalance = cards.map(card => {
     const cardPurchases = purchases.filter(p => 
       p.card_id === card.id && 
-      p.status === 'pending' && 
-      p.type === 'credit_card'
+      p.status === 'pending'
     );
     const calculatedBalance = cardPurchases.reduce((sum, p) => sum + Number(p.amount), 0);
+    
+    // For credit cards, balance is the accumulation of spending (current_balance = pending spending)
+    // For savings, we treat 'credit_limit' as the reference/total balance, and current_balance as what we've spent/withdrawn
+    
+    // Actually, let's treat it consistently: 'current_balance' field in this component is the ACCUMULATED PENDING spending
     return { ...card, current_balance: calculatedBalance };
   });
 
-  const totalLimit = cardsWithCalculatedBalance.reduce((acc, card) => acc + Number(card.credit_limit), 0);
-  const totalBalance = cardsWithCalculatedBalance.reduce((acc, card) => acc + Number(card.current_balance), 0);
+  const creditCards = cardsWithCalculatedBalance.filter(c => !c.account_type || c.account_type === 'credit');
+  const otherAccounts = cardsWithCalculatedBalance.filter(c => c.account_type && c.account_type !== 'credit');
+
+  const totalLimit = creditCards.reduce((acc, card) => acc + Number(card.credit_limit), 0);
+  const totalBalance = creditCards.reduce((acc, card) => acc + Number(card.current_balance), 0);
   
+  // For savings, we show the actual balance remaining (Limit - Current Spent)
+  const totalSavings = otherAccounts.reduce((acc, card) => acc + (Number(card.credit_limit) - Number(card.current_balance)), 0);
   const thisMonthPurchases = purchases.filter(p => {
     const d = new Date(p.purchase_date);
     const now = new Date();
@@ -99,7 +108,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {cardsWithCalculatedBalance.slice(0, 4).map((card) => (
+            {creditCards.slice(0, 4).map((card) => (
               <div 
                 key={card.id} 
                 onClick={() => setSelectedCardId(card.id)}
@@ -145,10 +154,52 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                 </div>
               </div>
             ))}
-            {cards.length === 0 && (
+            {creditCards.length === 0 && (
               <div className="h-36 rounded-2xl border border-dashed border-zinc-800 flex items-center justify-center text-zinc-600 text-sm italic col-span-2">
                 No active cards found
               </div>
+            )}
+          </div>
+        </section>
+
+        {/* Savings & Other Accounts - Span 4 */}
+        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Other Accounts</h2>
+            <div className="text-right">
+              <p className="text-[10px] text-zinc-500 uppercase font-bold">Total Assets</p>
+              <p className="text-sm font-bold text-emerald-400">₱{totalSavings.toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            {otherAccounts.map(account => (
+              <div key={account.id} className="p-4 bg-zinc-800/40 border border-zinc-800 rounded-2xl flex items-center justify-between group hover:bg-zinc-800/60 transition-all cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-zinc-700 transition-colors">
+                    <BankLogo bankName={account.bank_name} className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">{account.name}</h3>
+                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">
+                       {account.bank_name} {account.last_four ? `• **** ${account.last_four}` : ''}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-mono font-bold text-white">₱{(Number(account.credit_limit) - Number(account.current_balance)).toLocaleString()}</p>
+                  <div className="flex items-center gap-1.5 justify-end">
+                    {account.current_balance > 0 && (
+                      <span className="text-[9px] text-red-400 font-bold">-₱{Number(account.current_balance).toLocaleString()}</span>
+                    )}
+                    <Badge variant="outline" className="text-[8px] uppercase font-bold py-0 h-4 border-zinc-700 text-zinc-500">
+                      {account.account_type}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {otherAccounts.length === 0 && (
+              <div className="text-center py-10 text-zinc-600 italic text-sm">No linked savings or other cards</div>
             )}
           </div>
         </section>

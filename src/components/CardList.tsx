@@ -32,6 +32,7 @@ export function CardList({ cards, onRefresh }: CardListProps) {
   const [bankName, setBankName] = useState('');
   const [lastFour, setLastFour] = useState('');
   const [limit, setLimit] = useState('');
+  const [accountType, setAccountType] = useState<'credit' | 'savings' | 'other'>('credit');
   const [color, setColor] = useState('#3b82f6');
   const [loading, setLoading] = useState(false);
 
@@ -40,6 +41,7 @@ export function CardList({ cards, onRefresh }: CardListProps) {
     setBankName('');
     setLastFour('');
     setLimit('');
+    setAccountType('credit');
     setColor('#3b82f6');
     setEditingCard(null);
   };
@@ -50,6 +52,7 @@ export function CardList({ cards, onRefresh }: CardListProps) {
     setBankName(card.bank_name || '');
     setLastFour(card.last_four || '');
     setLimit(card.credit_limit.toString());
+    setAccountType(card.account_type || 'credit');
     setColor(card.color);
     setOpen(true);
   };
@@ -63,6 +66,7 @@ export function CardList({ cards, onRefresh }: CardListProps) {
         bank_name: bankName,
         last_four: lastFour,
         credit_limit: parseFloat(limit),
+        account_type: accountType,
         color,
         user_id: (await supabase.auth.getUser()).data.user?.id
       };
@@ -121,28 +125,50 @@ export function CardList({ cards, onRefresh }: CardListProps) {
           <DialogContent className="max-w-md bg-zinc-950 border-zinc-800 text-white rounded-3xl">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
-                <DialogTitle className="text-xl font-bold">Credit Card Setup</DialogTitle>
+                <DialogTitle className="text-xl font-bold">Financial Account Setup</DialogTitle>
                 <DialogDescription className="text-zinc-500 text-xs">
-                  Enter your card credentials for real-time tracking.
+                  Link your credit cards, savings accounts, or other financial cards.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-5 py-6">
+                <div className="grid gap-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Account Type</Label>
+                  <div className="flex p-1 bg-zinc-900 rounded-xl border border-zinc-800">
+                    {['credit', 'savings', 'other'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setAccountType(type as any)}
+                        className={cn(
+                          "flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all",
+                          accountType === type 
+                            ? "bg-zinc-800 text-white shadow-sm" 
+                            : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="grid gap-1.5">
                   <Label htmlFor="cardName" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Display Name</Label>
                   <Input id="cardName" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Shopping Card" className="bg-zinc-900 border-zinc-800 rounded-xl" required />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-1.5">
-                    <Label htmlFor="bank" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Bank Name</Label>
-                    <Input id="bank" value={bankName} onChange={e => setBankName(e.target.value)} placeholder="e.g. Chase" className="bg-zinc-900 border-zinc-800 rounded-xl" />
+                    <Label htmlFor="bank" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Bank/Institution</Label>
+                    <Input id="bank" value={bankName} onChange={e => setBankName(e.target.value)} placeholder="e.g. UnionBank" className="bg-zinc-900 border-zinc-800 rounded-xl" />
                   </div>
                   <div className="grid gap-1.5">
-                    <Label htmlFor="lastFour" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Last 4 Digits</Label>
+                    <Label htmlFor="lastFour" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Last 4 Digits/ID</Label>
                     <Input id="lastFour" value={lastFour} onChange={e => setLastFour(e.target.value)} placeholder="1234" maxLength={4} className="bg-zinc-900 border-zinc-800 rounded-xl" />
                   </div>
                 </div>
                 <div className="grid gap-1.5">
-                  <Label htmlFor="limit" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Credit Limit</Label>
+                  <Label htmlFor="limit" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">
+                    {accountType === 'credit' ? 'Credit Limit' : 'Current Balance'}
+                  </Label>
                   <Input id="limit" type="number" value={limit} onChange={e => setLimit(e.target.value)} placeholder="5000" className="bg-zinc-900 border-zinc-800 rounded-xl" required />
                 </div>
                 <div className="grid gap-1.5">
@@ -209,18 +235,27 @@ export function CardList({ cards, onRefresh }: CardListProps) {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-[11px] font-medium tracking-tight">
-                  <span className="text-zinc-500">Utilization Registry</span>
-                  <span className="text-zinc-300 font-bold font-mono">₱{Number(card.current_balance).toLocaleString()} <span className="text-zinc-500 font-normal">/ ₱{Number(card.credit_limit).toLocaleString()}</span></span>
+                  <span className="text-zinc-500">
+                    {card.account_type === 'credit' ? 'Utilization Registry' : 'Balance Registry'}
+                  </span>
+                  <span className="text-zinc-300 font-bold font-mono">
+                    ₱{Number(card.current_balance).toLocaleString()} 
+                    {card.account_type === 'credit' && (
+                      <span className="text-zinc-500 font-normal ml-1">/ ₱{Number(card.credit_limit).toLocaleString()}</span>
+                    )}
+                  </span>
                 </div>
-                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden p-[1px] border border-zinc-800">
-                  <div 
-                    className="h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.05)]" 
-                    style={{ 
-                      width: `${Math.min((card.current_balance / card.credit_limit) * 100, 100)}%`,
-                      backgroundColor: card.color 
-                    }} 
-                  />
-                </div>
+                {card.account_type === 'credit' && (
+                  <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden p-[1px] border border-zinc-800">
+                    <div 
+                      className="h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.05)]" 
+                      style={{ 
+                        width: `${Math.min((card.current_balance / card.credit_limit) * 100, 100)}%`,
+                        backgroundColor: card.color 
+                      }} 
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

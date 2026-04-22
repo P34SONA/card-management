@@ -1,4 +1,4 @@
-export type PurchaseType = 'credit_card' | 'tiktok_paylater' | 'other';
+export type PurchaseType = 'credit_card' | 'tiktok_paylater' | 'savings' | 'other';
 export type PurchaseStatus = 'pending' | 'paid';
 
 export interface CreditCard {
@@ -11,6 +11,7 @@ export interface CreditCard {
   current_balance: number;
   billing_cycle_day?: number;
   color: string;
+  account_type?: 'credit' | 'savings' | 'other';
   created_at: string;
 }
 
