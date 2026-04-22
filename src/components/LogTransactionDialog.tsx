@@ -178,14 +178,12 @@ export function LogTransactionDialog({
                   </SelectTrigger>
                   <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                     <SelectItem value="credit_card">Credit Card</SelectItem>
-                    <SelectItem value="tiktok_paylater">TikTok Paylater</SelectItem>
-                    <SelectItem value="savings">Savings / Debit</SelectItem>
-                    <SelectItem value="other">Survival / Other</SelectItem>
+                    <SelectItem value="tiktok_paylater">Installments</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="desc" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">{type === 'tiktok_paylater' ? 'Name' : 'Description'}</Label>
+                <Label htmlFor="desc" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">{type === 'tiktok_paylater' ? 'Name' : 'Name'}</Label>
                 <Input id="desc" value={description} onChange={e => setDescription(e.target.value)} placeholder="e.g. Starbucks" className="bg-zinc-900 border-zinc-800 rounded-xl " required />
               </div>
               {type === 'tiktok_paylater' ? (
@@ -270,7 +268,7 @@ export function LogTransactionDialog({
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                       {cards
-                        .filter(c => type === 'credit_card' ? (!c.account_type || c.account_type === 'credit') : (c.account_type === 'savings' || c.account_type === 'other'))
+                        .filter(c => (!c.account_type || c.account_type === 'credit'))
                         .map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                         ))}
