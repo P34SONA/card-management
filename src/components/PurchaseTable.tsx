@@ -53,6 +53,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
   const [category, setCategory] = useState('');
   const [merchant, setMerchant] = useState('Tiktok');
   const [installments, setInstallments] = useState('1');
+  const [paidMonths, setPaidMonths] = useState('0');
   const [monthlyAmount, setMonthlyAmount] = useState('');
   const [balance, setBalance] = useState('');
   const [notes, setNotes] = useState('');
@@ -68,6 +69,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
     setCategory('');
     setMerchant('Tiktok');
     setInstallments('1');
+    setPaidMonths('0');
     setMonthlyAmount('');
     setBalance('');
     setNotes('');
@@ -85,6 +87,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
     setCategory(p.category || '');
     setMerchant(p.notes?.split('|')[0]?.trim() || 'Tiktok');
     setInstallments(p.installment_count.toString());
+    setPaidMonths(p.current_installment.toString());
     setMonthlyAmount(p.monthly_amount?.toString() || '');
     setBalance(p.balance?.toString() || '');
     const actualNotes = p.notes?.includes('|') ? p.notes.split('|')[1]?.trim() : p.notes;
@@ -116,7 +119,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
         card_id: cardId === 'none' ? null : cardId,
         notes: finalNotes,
         installment_count: parseInt(installments) || 1,
-        current_installment: editingPurchase?.current_installment || 0,
+        current_installment: parseInt(paidMonths) || 0,
       };
 
       if (editingPurchase) {
@@ -253,27 +256,27 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
               <div className="grid gap-4 py-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-1.5">
-                    <Label htmlFor="desc" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">{type === 'tiktok_paylater' ? 'Name' : 'Description'}</Label>
-                    <Input id="desc" value={description} onChange={e => setDescription(e.target.value)} placeholder="e.g. Starbucks" className="bg-zinc-900 border-zinc-800 rounded-xl text-center" required />
+                    <Label htmlFor="desc" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">{type === 'tiktok_paylater' ? 'Name' : 'Description'}</Label>
+                    <Input id="desc" value={description} onChange={e => setDescription(e.target.value)} placeholder="e.g. Starbucks" className="bg-zinc-900 border-zinc-800 rounded-xl " required />
                   </div>
                   {type === 'tiktok_paylater' ? (
                     <div className="grid gap-1.5">
-                      <Label htmlFor="merchant" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Merchant</Label>
-                      <Input id="merchant" value={merchant} onChange={e => setMerchant(e.target.value)} placeholder="Tiktok" className="bg-zinc-900 border-zinc-800 rounded-xl text-center" />
+                      <Label htmlFor="merchant" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Merchant</Label>
+                      <Input id="merchant" value={merchant} onChange={e => setMerchant(e.target.value)} placeholder="Tiktok" className="bg-zinc-900 border-zinc-800 rounded-xl " />
                     </div>
                   ) : (
                     <div className="grid gap-1.5">
-                      <Label htmlFor="category" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Category</Label>
-                      <Input id="category" value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Food, Travel" className="bg-zinc-900 border-zinc-800 rounded-xl text-center" />
+                      <Label htmlFor="category" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Category</Label>
+                      <Input id="category" value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Food, Travel" className="bg-zinc-900 border-zinc-800 rounded-xl " />
                     </div>
                   )}
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-1.5">
-                    <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Status</Label>
+                    <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Status</Label>
                     <Select value={status} onValueChange={(val: any) => setStatus(val)}>
-                      <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl text-xs text-center">
+                      <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl text-xs ">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
@@ -283,10 +286,10 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                     </Select>
                   </div>
                   <div className="grid gap-1.5">
-                    <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Start Date</Label>
+                    <Label className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Start Date</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="bg-zinc-900 border-zinc-800 rounded-xl text-xs justify-center h-10 w-full">
+                        <Button variant="outline" className="bg-zinc-900 border-zinc-800 rounded-xl text-xs justify-start h-10 w-full">
                           <CalIcon className="mr-2 h-3.5 w-3.5 text-zinc-500" />
                           {purchaseDate ? format(purchaseDate, 'MMM d, yyyy') : <span>Pick a date</span>}
                         </Button>
@@ -300,27 +303,38 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-1.5">
-                    <Label htmlFor="amount" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">{type === 'tiktok_paylater' ? 'Total Amount' : 'Amount (PHP)'}</Label>
+                    <Label htmlFor="amount" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">{type === 'tiktok_paylater' ? 'Total Amount' : 'Amount (PHP)'}</Label>
                     <Input id="amount" type="number" step="0.01" value={amount} onChange={e => {
                       setAmount(e.target.value);
                       if (type === 'tiktok_paylater' && installments !== '1' && !monthlyAmount) {
                         const amt = parseFloat(e.target.value) || 0;
                         const inst = parseInt(installments) || 1;
-                        setMonthlyAmount((amt / inst).toFixed(2));
+                        const mAmount = amt / inst;
+                        setMonthlyAmount(mAmount.toFixed(2));
+                        
+                        // Auto deduct balance based on current paid months
+                        const currentPaid = parseInt(paidMonths) || 0;
+                        setBalance((amt - (mAmount * currentPaid)).toFixed(2));
                       }
-                    }} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl text-center" required />
+                    }} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl " required />
                   </div>
                   {type === 'tiktok_paylater' && (
                     <div className="grid gap-1.5">
-                      <Label htmlFor="perMonth" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Per Month</Label>
-                      <Input id="perMonth" type="number" step="0.01" value={monthlyAmount} onChange={e => setMonthlyAmount(e.target.value)} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl text-center" />
+                      <Label htmlFor="perMonth" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Per Month</Label>
+                      <Input id="perMonth" type="number" step="0.01" value={monthlyAmount} onChange={e => {
+                        setMonthlyAmount(e.target.value);
+                        const mAmount = parseFloat(e.target.value) || 0;
+                        const amt = parseFloat(amount) || 0;
+                        const currentPaid = parseInt(paidMonths) || 0;
+                        setBalance((amt - (mAmount * currentPaid)).toFixed(2));
+                      }} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl " />
                     </div>
                   )}
                   {type === 'credit_card' && (
                     <div className="grid gap-1.5">
-                      <Label htmlFor="card" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Target Card</Label>
+                      <Label htmlFor="card" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Target Card</Label>
                       <Select value={cardId} onValueChange={setCardId}>
-                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl text-center">
+                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl ">
                           <SelectValue placeholder="Select card" />
                         </SelectTrigger>
                         <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
@@ -335,16 +349,19 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                 </div>
 
                 {type === 'tiktok_paylater' && (
+                  <>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-1.5">
-                      <Label htmlFor="inst" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Terms (Months)</Label>
+                      <Label htmlFor="inst" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Terms (Months)</Label>
                       <Select value={installments} onValueChange={(val) => {
                         setInstallments(val);
-                        // Only auto-compute if monthlyAmount is empty
+                        const amt = parseFloat(amount) || 0;
+                        const inst = parseInt(val) || 1;
                         if (!monthlyAmount) {
-                          const amt = parseFloat(amount) || 0;
-                          const inst = parseInt(val) || 1;
-                          setMonthlyAmount((amt / inst).toFixed(2));
+                          const mAmount = amt / inst;
+                          setMonthlyAmount(mAmount.toFixed(2));
+                          const currentPaid = parseInt(paidMonths) || 0;
+                          setBalance((amt - (mAmount * currentPaid)).toFixed(2));
                         }
                         
                         // Set 30th of month
@@ -352,7 +369,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                         const days = getDaysInMonth(now);
                         setDueDate(setDate(now, Math.min(30, days)));
                       }}>
-                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl font-bold text-center">
+                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl font-bold ">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
@@ -363,10 +380,21 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                       </Select>
                     </div>
                     <div className="grid gap-1.5">
-                      <Label htmlFor="balance" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider text-center">Starting Balance</Label>
-                      <Input id="balance" type="number" step="0.01" value={balance} onChange={e => setBalance(e.target.value)} placeholder="If different from total" className="bg-zinc-900 border-zinc-800 rounded-xl text-center" />
+                      <Label htmlFor="paidMonths" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Paid Months</Label>
+                      <Input id="paidMonths" type="number" value={paidMonths} onChange={e => {
+                        setPaidMonths(e.target.value);
+                        const currentPaid = parseInt(e.target.value) || 0;
+                        const amt = parseFloat(amount) || 0;
+                        const mAmount = parseFloat(monthlyAmount) || 0;
+                        setBalance((amt - (mAmount * currentPaid)).toFixed(2));
+                      }} placeholder="0" className="bg-zinc-900 border-zinc-800 rounded-xl " />
                     </div>
                   </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="balance" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">Remaining Balance</Label>
+                    <Input id="balance" type="number" step="0.01" value={balance} onChange={e => setBalance(e.target.value)} placeholder="Auto-calculated" className="bg-zinc-900 border-zinc-800 rounded-xl " />
+                  </div>
+                  </>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
