@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { CreditCard, Purchase } from '@/types/database';
 import { CreditCard as CardIcon, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 
 interface DashboardProps {
@@ -88,7 +89,14 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                     <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">{card.name}</p>
                     <p className="text-[9px] text-emerald-500 font-bold uppercase tracking-tighter">Available: ₱{(Number(card.credit_limit) - Number(card.current_balance)).toLocaleString()}</p>
                   </div>
-                  <p className="text-2xl font-bold text-white">₱{Number(card.current_balance).toLocaleString()} <span className="text-xs text-zinc-500 font-normal tracking-normal">/ ₱{Number(card.credit_limit).toLocaleString()}</span></p>
+                  <p className={cn(
+                    "text-2xl font-bold transition-colors",
+                    (card.current_balance / card.credit_limit) >= 0.9 ? "text-red-500" : 
+                    (card.current_balance / card.credit_limit) >= 0.6 ? "text-amber-500" : 
+                    "text-white"
+                  )}>
+                    ₱{Number(card.current_balance).toLocaleString()} <span className="text-xs text-zinc-500 font-normal tracking-normal">/ ₱{Number(card.credit_limit).toLocaleString()}</span>
+                  </p>
                   <div className="mt-2 h-1 w-full bg-white/5 rounded-full overflow-hidden">
                     <div 
                       className="h-full rounded-full transition-all duration-1000" 
@@ -157,11 +165,10 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        {/* Other Expenses - Span 4 */}
+        {/* Borrowed Money - Span 4 */}
         <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Other Spending</h2>
-            <p className="text-[10px] text-zinc-400">Monthly Avg: $... </p>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Borrowed Money</h2>
           </div>
           <div className="flex-1 space-y-1">
             {purchases.filter(p => p.type === 'other').slice(0, 5).map(p => (

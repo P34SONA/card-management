@@ -12,9 +12,11 @@ import { Dashboard } from '@/components/Dashboard';
 import { CardList } from '@/components/CardList';
 import { PurchaseTable } from '@/components/PurchaseTable';
 import { Sidebar } from '@/components/Sidebar';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, Plus } from 'lucide-react';
 import { useData } from '@/hooks/useData';
 import { Input } from '@/components/ui/input';
+import { LogTransactionDialog } from '@/components/LogTransactionDialog';
+import { Button } from '@/components/ui/button';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -23,6 +25,12 @@ export default function App() {
   const [globalSearch, setGlobalSearch] = useState('');
 
   const { cards, purchases, loading: dataLoading, refresh } = useData();
+
+  const getTargetType = () => {
+    if (currentView === 'tiktok') return 'tiktok_paylater';
+    if (currentView === 'other') return 'other';
+    return 'credit_card';
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -75,13 +83,26 @@ export default function App() {
                   <h1 className="text-3xl font-bold tracking-tight text-white">Purchase Registry</h1>
                   <p className="text-sm text-zinc-500 tracking-wide">Detailed transaction logs categorized by source.</p>
                 </div>
-                <div className="relative w-full md:w-96">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                  <Input 
-                    placeholder="Search all registries..." 
-                    className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
-                    value={globalSearch}
-                    onChange={(e) => setGlobalSearch(e.target.value)}
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <div className="relative w-full md:w-96">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <Input 
+                      placeholder="Search all registries..." 
+                      className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
+                      value={globalSearch}
+                      onChange={(e) => setGlobalSearch(e.target.value)}
+                    />
+                  </div>
+                  <LogTransactionDialog 
+                    cards={cards} 
+                    onRefresh={refresh} 
+                    defaultType="credit_card"
+                    trigger={
+                      <Button className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg">
+                        <Plus className="w-4 h-4" />
+                        NEW LOG
+                      </Button>
+                    }
                   />
                 </div>
               </header>
@@ -113,13 +134,26 @@ export default function App() {
                   <h1 className="text-3xl font-bold tracking-tight text-white">TikTok Paylater</h1>
                   <p className="text-sm text-zinc-500 tracking-wide">Manage your micro-installments and monthly payments.</p>
                 </div>
-                <div className="relative w-full md:w-96">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                  <Input 
-                    placeholder="Search TikTok registry..." 
-                    className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
-                    value={globalSearch}
-                    onChange={(e) => setGlobalSearch(e.target.value)}
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <div className="relative w-full md:w-96">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <Input 
+                      placeholder="Search TikTok registry..." 
+                      className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
+                      value={globalSearch}
+                      onChange={(e) => setGlobalSearch(e.target.value)}
+                    />
+                  </div>
+                  <LogTransactionDialog 
+                    cards={cards} 
+                    onRefresh={refresh} 
+                    defaultType="tiktok_paylater"
+                    trigger={
+                      <Button className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg">
+                        <Plus className="w-4 h-4" />
+                        NEW LOG
+                      </Button>
+                    }
                   />
                 </div>
               </header>
@@ -139,13 +173,26 @@ export default function App() {
                   <h1 className="text-3xl font-bold tracking-tight text-white">Other Expenses</h1>
                   <p className="text-sm text-zinc-500 tracking-wide">Log cash transactions and everyday survival costs.</p>
                 </div>
-                <div className="relative w-full md:w-96">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                  <Input 
-                    placeholder="Search expenses..." 
-                    className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
-                    value={globalSearch}
-                    onChange={(e) => setGlobalSearch(e.target.value)}
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <div className="relative w-full md:w-96">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <Input 
+                      placeholder="Search expenses..." 
+                      className="pl-10 bg-zinc-900 border-zinc-800 rounded-xl text-white"
+                      value={globalSearch}
+                      onChange={(e) => setGlobalSearch(e.target.value)}
+                    />
+                  </div>
+                  <LogTransactionDialog 
+                    cards={cards} 
+                    onRefresh={refresh} 
+                    defaultType="other"
+                    trigger={
+                      <Button className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg">
+                        <Plus className="w-4 h-4" />
+                        NEW LOG
+                      </Button>
+                    }
                   />
                 </div>
               </header>
