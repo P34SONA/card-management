@@ -18,8 +18,13 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   // Calculate dynamic balance for each card based on pending purchases
+  // ONLY include purchases of type 'credit_card'
   const cardsWithCalculatedBalance = cards.map(card => {
-    const cardPurchases = purchases.filter(p => p.card_id === card.id && p.status === 'pending');
+    const cardPurchases = purchases.filter(p => 
+      p.card_id === card.id && 
+      p.status === 'pending' && 
+      p.type === 'credit_card'
+    );
     const calculatedBalance = cardPurchases.reduce((sum, p) => sum + Number(p.amount), 0);
     return { ...card, current_balance: calculatedBalance };
   });
@@ -151,10 +156,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
         {/* TikTok Paylater - Span 4 */}
         <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <BankLogo bankName="TikTok" className="w-4 h-4" />
-              <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">TikTok PayLater</h2>
-            </div>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">TikTok PayLater</h2>
             <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 text-[10px] uppercase font-bold">Installments</Badge>
           </div>
           <div className="space-y-3">
