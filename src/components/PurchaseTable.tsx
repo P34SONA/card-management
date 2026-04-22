@@ -428,9 +428,10 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh, external
                 {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Paid Months</TableHead>}
                 {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Remaining</TableHead>}
                 {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Start Date</TableHead>}
-                {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Amount</TableHead>}
+                {(type === 'credit_card' || type === 'other') && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Amount</TableHead>}
                 <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Status</TableHead>
                 {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Payment Due</TableHead>}
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Notes</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
           </TableHeader>
@@ -493,7 +494,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh, external
                       {format(new Date(p.purchase_date), 'MMMM dd, yyyy')}
                     </TableCell>
                   )}
-                  {type === 'credit_card' && (
+                  {(type === 'credit_card' || type === 'other') && (
                     <TableCell className="text-center font-bold font-mono text-white">
                       ₱{Number(p.amount).toLocaleString()}
                     </TableCell>
@@ -520,6 +521,12 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh, external
                       {format(new Date(p.due_date), 'MMM dd, yyyy')}
                     </TableCell>
                   )}
+                  <TableCell className="text-center text-xs text-zinc-500 max-w-[150px] truncate">
+                    {type === 'tiktok_paylater' 
+                      ? (p.notes?.includes('|') ? p.notes.split('|')[1]?.trim() : '')
+                      : p.notes
+                    }
+                  </TableCell>
                   <TableCell className="text-center pr-6">
                     <div className="flex justify-center gap-1">
                       <Button variant="ghost" size="icon" className={cn(

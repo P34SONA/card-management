@@ -12,8 +12,9 @@ import { Dashboard } from '@/components/Dashboard';
 import { CardList } from '@/components/CardList';
 import { PurchaseTable } from '@/components/PurchaseTable';
 import { Sidebar } from '@/components/Sidebar';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import { useData } from '@/hooks/useData';
+import { Input } from '@/components/ui/input';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
