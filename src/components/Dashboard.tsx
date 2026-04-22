@@ -229,6 +229,30 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
 
         <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
           <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">7-Day Trend</h2>
+            <div className="flex items-center gap-2">
+               <div className="w-2 h-2 rounded bg-indigo-500" />
+               <span className="text-[10px] text-zinc-500 uppercase font-bold">Daily Spend</span>
+            </div>
+          </div>
+          <div className="h-[180px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={lineData}>
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px', border: '1px solid #3f3f46' }}
+                  itemStyle={{ color: '#818cf8', fontWeight: 'bold' }}
+                  labelStyle={{ color: '#71717a', marginBottom: '4px', fontWeight: 'bold' }}
+                  formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Spent']}
+                />
+                <Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#18181b' }} activeDot={{ r: 6, fill: '#818cf8' }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+
+        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Spending Overview</h2>
           </div>
           <div className="h-[180px] w-full">
@@ -236,8 +260,9 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
               <BarChart data={barData.slice(0, 5)}>
                 <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
-                  itemStyle={{ color: '#818cf8' }}
+                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px', border: '1px solid #3f3f46' }}
+                  itemStyle={{ color: '#818cf8', fontWeight: 'bold' }}
+                  labelStyle={{ color: '#71717a', marginBottom: '4px', fontWeight: 'bold' }}
                   formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Amount']}
                 />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={20}>
@@ -263,8 +288,9 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
               <BarChart data={[{ name: 'Borrow', value: purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0) }]}>
                 <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#71717a'}} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px' }}
-                  itemStyle={{ color: '#f59e0b' }}
+                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '10px', border: '1px solid #3f3f46' }}
+                  itemStyle={{ color: '#f59e0b', fontWeight: 'bold' }}
+                  labelStyle={{ color: '#71717a', marginBottom: '4px', fontWeight: 'bold' }}
                   formatter={(value: any) => [`₱${Number(value).toLocaleString()}`, 'Total']}
                 />
                 <Bar dataKey="value" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={40} />

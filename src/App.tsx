@@ -192,14 +192,19 @@ export default function App() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => setShowPaidGlobal(!showPaidGlobal)}
+                    onClick={() => {
+                      const states: ('all' | 'pending' | 'paid')[] = ['all', 'pending', 'paid'];
+                      const next = states[(states.indexOf(filterStatus) + 1) % states.length];
+                      setFilterStatus(next);
+                    }}
                     className={cn(
-                      "h-10 rounded-xl text-[10px] font-bold uppercase px-4 border border-zinc-800",
-                      showPaidGlobal ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "text-zinc-500"
+                      "h-10 rounded-xl text-[10px] font-bold uppercase px-4 border border-zinc-800 transition-all",
+                      filterStatus === 'all' ? "text-indigo-400" :
+                      filterStatus === 'paid' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "text-amber-500 bg-amber-500/10 border-amber-500/20"
                     )}
                   >
                     <Filter className="w-3.5 h-3.5 mr-2" />
-                    {showPaidGlobal ? 'Showing Paid' : 'Show Pending'}
+                    {filterStatus === 'all' ? 'All Registry' : filterStatus === 'paid' ? 'Paid Only' : 'Pending Only'}
                   </Button>
                   <Button 
                     className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg"
@@ -218,7 +223,7 @@ export default function App() {
                 type="tiktok_paylater"
                 onRefresh={refresh}
                 externalSearch={globalSearch}
-                showPaidOnly={showPaidGlobal}
+                filterStatus={filterStatus}
                 onEdit={handleEditPurchase}
               />
             </div>
@@ -244,14 +249,19 @@ export default function App() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => setShowPaidGlobal(!showPaidGlobal)}
+                    onClick={() => {
+                      const states: ('all' | 'pending' | 'paid')[] = ['all', 'pending', 'paid'];
+                      const next = states[(states.indexOf(filterStatus) + 1) % states.length];
+                      setFilterStatus(next);
+                    }}
                     className={cn(
-                      "h-10 rounded-xl text-[10px] font-bold uppercase px-4 border border-zinc-800",
-                      showPaidGlobal ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "text-zinc-500"
+                      "h-10 rounded-xl text-[10px] font-bold uppercase px-4 border border-zinc-800 transition-all",
+                      filterStatus === 'all' ? "text-indigo-400" :
+                      filterStatus === 'paid' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "text-amber-500 bg-amber-500/10 border-amber-500/20"
                     )}
                   >
                     <Filter className="w-3.5 h-3.5 mr-2" />
-                    {showPaidGlobal ? 'Showing Paid' : 'Show Pending'}
+                    {filterStatus === 'all' ? 'All Registry' : filterStatus === 'paid' ? 'Paid Only' : 'Pending Only'}
                   </Button>
                   <Button 
                     className="gap-2 bg-zinc-100 text-zinc-900 hover:bg-white rounded-full text-[11px] font-bold h-10 px-6 shrink-0 shadow-lg"
@@ -270,7 +280,7 @@ export default function App() {
                 type="other"
                 onRefresh={refresh}
                 externalSearch={globalSearch}
-                showPaidOnly={showPaidGlobal}
+                filterStatus={filterStatus}
                 onEdit={handleEditPurchase}
               />
             </div>
