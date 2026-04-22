@@ -88,19 +88,6 @@ export default function App() {
                     />
                   </div>
                 ))}
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 px-2">
-                     <div className="w-1.5 h-6 rounded-full bg-zinc-700" />
-                     <h2 className="text-xl font-bold text-white uppercase tracking-tight">Default Balance <span className="text-zinc-600 font-mono text-xs ml-2">Registry</span></h2>
-                  </div>
-                  <PurchaseTable 
-                    purchases={purchases.filter(p => p.type === 'credit_card' && (!p.card_id || p.card_id === 'none'))} 
-                    type="credit_card"
-                    cards={cards}
-                    onRefresh={refresh}
-                  />
-                </div>
               </div>
             </div>
           )}

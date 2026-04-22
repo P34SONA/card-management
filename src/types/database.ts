@@ -27,6 +27,7 @@ export interface Purchase {
   type: PurchaseType;
   installment_count: number;
   current_installment: number;
+  monthly_amount?: number;
   parent_id?: string; // For installments, refers to the original transaction ID
   notes?: string;
   created_at: string;

@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Calendar as CalIcon, Filter, Search, CreditCard as CardIcon, ShoppingBag, Wallet } from 'lucide-react';
-import { format, addMonths } from 'date-fns';
+import { format, addMonths, setDate, getDaysInMonth } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import {
@@ -52,6 +52,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
   const [status, setStatus] = useState<PurchaseStatus>('pending');
   const [category, setCategory] = useState('');
   const [installments, setInstallments] = useState('1');
+  const [monthlyAmount, setMonthlyAmount] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -64,6 +65,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
     setStatus('pending');
     setCategory('');
     setInstallments('1');
+    setMonthlyAmount('');
     setNotes('');
     setEditingPurchase(null);
   };
@@ -78,6 +80,7 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
     setStatus(p.status);
     setCategory(p.category || '');
     setInstallments(p.installment_count.toString());
+    setMonthlyAmount(p.monthly_amount?.toString() || '');
     setNotes(p.notes || '');
     setOpen(true);
   };
@@ -93,13 +96,16 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
         user_id: user.id,
         description,
         amount: parseFloat(amount),
-        purchase_date: format(new Date(), 'yyyy-MM-dd'), // Automatically set to current date
+        monthly_amount: parseFloat(monthlyAmount) || null,
+        purchase_date: format(new Date(), 'yyyy-MM-dd'),
         due_date: format(dueDate, 'yyyy-MM-dd'),
         status,
         category,
         type,
         card_id: cardId === 'none' ? null : cardId,
         notes,
+        installment_count: parseInt(installments) || 1,
+        current_installment: editingPurchase?.current_installment || 1,
       };
 
       if (editingPurchase) {
@@ -107,49 +113,9 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
         if (error) throw error;
         toast.success('Log updated');
       } else {
-        // Handle installments for TikTok
-        if (type === 'tiktok_paylater' && parseInt(installments) > 1) {
-          const count = parseInt(installments);
-          const perMonth = parseFloat(amount) / count;
-          
-          // Original transaction
-          const { data: parentData, error: parentError } = await supabase
-            .from('purchases')
-            .insert([{ 
-              ...baseData, 
-              amount: perMonth, 
-              installment_count: count, 
-              current_installment: 1,
-              description: `${description} (1/${count})`
-            }])
-            .select()
-            .single();
-            
-          if (parentError) throw parentError;
-
-          // Remaining installments
-          const installmentLogs = [];
-          for (let i = 2; i <= count; i++) {
-            installmentLogs.push({
-              ...baseData,
-              amount: perMonth,
-              installment_count: count,
-              current_installment: i,
-              parent_id: parentData.id,
-              description: `${description} (${i}/${count})`,
-              purchase_date: baseData.purchase_date,
-              due_date: format(addMonths(new Date(baseData.due_date), i - 1), 'yyyy-MM-dd'),
-              status: 'pending' as PurchaseStatus
-            });
-          }
-          const { error: batchError } = await supabase.from('purchases').insert(installmentLogs);
-          if (batchError) throw batchError;
-          toast.success(`Created ${count} installments`);
-        } else {
-          const { error } = await supabase.from('purchases').insert([baseData]);
-          if (error) throw error;
-          toast.success('Purchase logged');
-        }
+        const { error } = await supabase.from('purchases').insert([baseData]);
+        if (error) throw error;
+        toast.success('Purchase logged');
       }
 
       onRefresh();
@@ -175,6 +141,32 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
   };
 
   const toggleStatus = async (p: Purchase) => {
+    if (type === 'tiktok_paylater' && p.status === 'pending') {
+      const nextInstallment = p.current_installment + 1;
+      const isFinished = nextInstallment > p.installment_count;
+      
+      const nextDueDate = new Date(p.due_date);
+      const nextMonth = addMonths(nextDueDate, 1);
+      const daysInNextMonth = getDaysInMonth(nextMonth);
+      const targetDate = setDate(nextMonth, Math.min(30, daysInNextMonth));
+
+      const updates: any = {
+        status: isFinished ? 'paid' : 'pending',
+        current_installment: isFinished ? p.installment_count : nextInstallment,
+        due_date: isFinished ? p.due_date : format(targetDate, 'yyyy-MM-dd')
+      };
+
+      try {
+        const { error } = await supabase.from('purchases').update(updates).eq('id', p.id);
+        if (error) throw error;
+        toast.info(isFinished ? 'Installment finished!' : `Advanced to month ${nextInstallment}`);
+        onRefresh();
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+      return;
+    }
+
     const newStatus = p.status === 'paid' ? 'pending' : 'paid';
     try {
       const { error } = await supabase.from('purchases').update({ status: newStatus }).eq('id', p.id);
@@ -269,9 +261,22 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-1.5">
-                    <Label htmlFor="amount" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Amount (PHP)</Label>
-                    <Input id="amount" type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl" required />
+                    <Label htmlFor="amount" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">{type === 'tiktok_paylater' ? 'Total Amount' : 'Amount (PHP)'}</Label>
+                    <Input id="amount" type="number" step="0.01" value={amount} onChange={e => {
+                      setAmount(e.target.value);
+                      if (type === 'tiktok_paylater' && installments !== '1') {
+                        const amt = parseFloat(e.target.value) || 0;
+                        const inst = parseInt(installments) || 1;
+                        setMonthlyAmount((amt / inst).toFixed(2));
+                      }
+                    }} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl" required />
                   </div>
+                  {type === 'tiktok_paylater' && (
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="perMonth" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Per Month</Label>
+                      <Input id="perMonth" type="number" step="0.01" value={monthlyAmount} onChange={e => setMonthlyAmount(e.target.value)} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl" />
+                    </div>
+                  )}
                   {type === 'credit_card' && (
                     <div className="grid gap-1.5">
                       <Label htmlFor="card" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Target Card</Label>
@@ -288,22 +293,35 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                       </Select>
                     </div>
                   )}
-                  {type === 'tiktok_paylater' && (
+                </div>
+
+                {type === 'tiktok_paylater' && (
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-1.5">
-                      <Label htmlFor="inst" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Installments</Label>
-                      <Select value={installments} onValueChange={setInstallments}>
-                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl">
+                      <Label htmlFor="inst" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Terms (Months)</Label>
+                      <Select value={installments} onValueChange={(val) => {
+                        setInstallments(val);
+                        const amt = parseFloat(amount) || 0;
+                        const inst = parseInt(val) || 1;
+                        setMonthlyAmount((amt / inst).toFixed(2));
+                        
+                        // Set 30th of month
+                        const now = new Date();
+                        const days = getDaysInMonth(now);
+                        setDueDate(setDate(now, Math.min(30, days)));
+                      }}>
+                        <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl font-bold">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                           {[1, 3, 6, 12, 24].map(n => (
-                            <SelectItem key={n} value={n.toString()}>{n}x Months</SelectItem>
+                            <SelectItem key={n} value={n.toString()}>{n} Months</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-1.5">
@@ -339,16 +357,17 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
         <Table>
           <TableHeader className="bg-zinc-950/50">
-            <TableRow className="border-zinc-800 hover:bg-transparent">
-              <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 px-6">Description</TableHead>
-              <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Category</TableHead>
-              {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Card</TableHead>}
-              {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Slot</TableHead>}
-              <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Amount</TableHead>
-              <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Status</TableHead>
-              <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Payment Due</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
-            </TableRow>
+              <TableRow className="border-zinc-800 hover:bg-transparent">
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 px-6">Description</TableHead>
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Category</TableHead>
+                {type === 'credit_card' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Card</TableHead>}
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Terms</TableHead>}
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">{type === 'tiktok_paylater' ? 'Total Amount' : 'Amount'}</TableHead>
+                {type === 'tiktok_paylater' && <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-right">Per Month</TableHead>}
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12 text-center">Status</TableHead>
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-12">Payment Due</TableHead>
+                <TableHead className="w-[100px]"></TableHead>
+              </TableRow>
           </TableHeader>
           <TableBody>
             {filteredPurchases.length === 0 ? (
@@ -378,12 +397,20 @@ export function PurchaseTable({ purchases, type, cards = [], onRefresh }: Purcha
                   )}
                   {type === 'tiktok_paylater' && (
                     <TableCell>
-                      <span className="text-[10px] font-mono text-zinc-500">#{p.current_installment} / {p.installment_count}</span>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-white uppercase tracking-tight">Month {p.current_installment}</span>
+                        <span className="text-[9px] font-mono text-zinc-500 italic">of {p.installment_count} total</span>
+                      </div>
                     </TableCell>
                   )}
                   <TableCell className="text-right font-bold font-mono text-white">
                     ₱{Number(p.amount).toLocaleString()}
                   </TableCell>
+                  {type === 'tiktok_paylater' && (
+                    <TableCell className="text-right font-bold font-mono text-indigo-400">
+                      ₱{Number(p.monthly_amount || 0).toLocaleString()}
+                    </TableCell>
+                  )}
                   <TableCell className="text-center">
                     <button onClick={() => toggleStatus(p)}>
                       <Badge className={cn(
