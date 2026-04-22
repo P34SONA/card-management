@@ -107,7 +107,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {creditCards.slice(0, 4).map((card) => (
+            {creditCards.map((card) => (
               <div 
                 key={card.id} 
                 onClick={() => setSelectedCardId(card.id)}
@@ -209,7 +209,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
             <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 text-[10px] uppercase font-bold">Installments</Badge>
           </div>
           <div className="space-y-3">
-            {purchases.filter(p => p.type === 'tiktok_paylater' && p.status === 'pending').slice(0, 3).map((p) => (
+            {purchases.filter(p => p.type === 'tiktok_paylater' && p.status === 'pending').map((p) => (
               <div key={p.id} className="p-3.5 bg-zinc-800/40 border border-zinc-800 rounded-xl hover:bg-zinc-800/60 transition-colors">
                 <div className="flex justify-between items-start mb-1 text-sm font-medium">
                   <span className="truncate max-w-[120px] font-bold text-white">{p.description}</span>

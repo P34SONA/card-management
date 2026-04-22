@@ -38,7 +38,7 @@ interface PurchaseTableProps {
   onRefresh: () => void;
   onEdit: (p: Purchase) => void;
   externalSearch?: string;
-  showPaidOnly?: boolean;
+  filterStatus?: 'all' | 'pending' | 'paid';
 }
 
 export function PurchaseTable({ 
@@ -48,7 +48,7 @@ export function PurchaseTable({
   onRefresh, 
   onEdit,
   externalSearch = '',
-  showPaidOnly = false
+  filterStatus = 'all'
 }: PurchaseTableProps) {
   const [open, setOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
@@ -116,7 +116,10 @@ export function PurchaseTable({
       const matchesSearch = p.description.toLowerCase().includes(query) || 
                           (p.notes && p.notes.toLowerCase().includes(query)) ||
                           (p.category && p.category.toLowerCase().includes(query));
-      const matchesPaidFilter = showPaidOnly ? p.status === 'paid' : p.status !== 'paid';
+      const matchesPaidFilter = 
+        filterStatus === 'all' ? true :
+        filterStatus === 'paid' ? p.status === 'paid' :
+        p.status !== 'paid';
       return matchesSearch && matchesPaidFilter;
     })
     .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime());
