@@ -117,10 +117,10 @@ export function CardList({ cards, onRefresh }: CardListProps) {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 p-6 rounded-3xl shadow-lg">
+      <div className="flex items-center justify-between bg-white/[0.03] backdrop-blur-[32px] border border-white/10 p-8 rounded-[2rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Linked Cards</h1>
-          <p className="text-xs text-zinc-500 tracking-wide mt-1">Manage your credit inventory and limits.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-white mb-1">Linked Cards</h1>
+          <p className="text-[10px] text-white/30 uppercase font-bold tracking-[0.15em]">Registry Management Engine</p>
         </div>
         <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) resetForm(); }}>
           <DialogTrigger asChild>
@@ -210,7 +210,7 @@ export function CardList({ cards, onRefresh }: CardListProps) {
         {cards.map((card) => (
           <div 
             key={card.id} 
-            className="group relative bg-zinc-900 border border-zinc-800 rounded-3xl p-6 overflow-hidden transition-all hover:border-zinc-700 hover:translate-y-[-2px] shadow-lg"
+            className="group relative bg-white/[0.03] backdrop-blur-[32px] border border-white/10 rounded-[2.5rem] p-8 overflow-hidden transition-all hover:border-white/20 hover:translate-y-[-4px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]"
           >
             <div className="absolute top-0 right-0 w-32 h-32 blur-[80px] opacity-20 pointer-events-none" style={{ backgroundColor: card.color }} />
             

@@ -95,9 +95,9 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
 
       <div className="grid grid-cols-12 gap-4">
         {/* Row 1: Credit Cards (8) & Other Accounts (4) */}
-        <section className="col-span-12 lg:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Active Credit Cards</h2>
+        <section className="col-span-12 lg:col-span-8 bg-white/[0.03] backdrop-blur-[32px] border border-white/10 rounded-[2.5rem] p-8 flex flex-col gap-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+          <div className="flex justify-between items-center px-2">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Active Credit Cards</h2>
             <div className="flex items-center gap-4">
                {selectedCardId && (
                  <button 
@@ -170,9 +170,9 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Other Accounts</h2>
+        <section className="col-span-12 lg:col-span-4 bg-white/[0.03] backdrop-blur-[32px] border border-white/10 rounded-[2.5rem] p-8 flex flex-col gap-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+          <div className="flex justify-between items-center px-2">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Other Accounts</h2>
             <div className="text-right">
               <p className="text-[10px] text-zinc-500 uppercase font-bold">Total Assets</p>
               <p className="text-sm font-bold text-emerald-400">₱{totalSavings.toLocaleString()}</p>
@@ -212,9 +212,9 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
         </section>
 
         {/* Row 2: Charts Row */}
-        <section className="col-span-12 lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col shadow-xl">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">7-Day Trend</h2>
+        <section className="col-span-12 lg:col-span-6 bg-white/[0.03] backdrop-blur-[32px] border border-white/10 rounded-[2.5rem] p-8 flex flex-col shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+          <div className="flex justify-between items-center mb-8 px-2">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">7-Day Spend Trend</h2>
           </div>
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -248,9 +248,9 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        <section className="col-span-12 lg:col-span-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col shadow-xl">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Spending Overview</h2>
+        <section className="col-span-12 lg:col-span-6 bg-white/[0.03] backdrop-blur-[32px] border border-white/10 rounded-[2.5rem] p-8 flex flex-col shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+          <div className="flex justify-between items-center mb-8 px-2">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Spending Overview</h2>
           </div>
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -273,10 +273,10 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
         </section>
 
         {/* Row 3: Registry Row */}
-        <section className="col-span-12 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-xl">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Scheduled Installments</h2>
-            <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 text-[10px] uppercase font-bold">Installments</Badge>
+        <section className="col-span-12 lg:col-span-4 bg-white/[0.03] backdrop-blur-[32px] border border-white/10 rounded-[2.5rem] p-8 flex flex-col gap-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+          <div className="flex justify-between items-center px-2">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Scheduled Installments</h2>
+            <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/20 text-[9px] uppercase font-bold tracking-tight">Installments</Badge>
           </div>
           <div className="space-y-3">
             {purchases.filter(p => p.type === 'tiktok_paylater' && p.status === 'pending').map((p) => (
@@ -297,9 +297,9 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
           </div>
         </section>
 
-        <section className="col-span-12 lg:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col gap-6 shadow-xl">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Borrowed Money Summary</h2>
+        <section className="col-span-12 lg:col-span-8 bg-white/[0.03] backdrop-blur-[32px] border border-white/10 rounded-[2.5rem] p-8 flex flex-col gap-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+          <div className="flex justify-between items-center px-2">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Borrowed Money Summary</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
             {purchases.filter(p => p.type === 'other').map(p => (

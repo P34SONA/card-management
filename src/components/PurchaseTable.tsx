@@ -125,23 +125,23 @@ export function PurchaseTable({
     .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime());
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
+    <div className="bg-white/[0.03] backdrop-blur-[32px] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
       <Table className="table-fixed w-full">
-          <TableHeader className="bg-zinc-950 border-b border-zinc-800">
+          <TableHeader className="bg-white/[0.02] border-b border-white/5">
               <TableRow className="hover:bg-transparent border-none">
                 {/* Name Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 pl-12 pr-6 text-center w-[22%]">
+                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 pl-12 pr-6 text-center w-[22%]">
                   Name
                 </TableHead>
 
                 {/* Merchant / Category Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[12%]">
+                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[12%]">
                   {type === 'tiktok_paylater' ? 'Merchant' : 'Category'}
                 </TableHead>
 
                 {/* Card Column (Credit Card only) */}
                 {type === 'credit_card' && (
-                  <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[10%]">
+                  <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[10%]">
                     Card
                   </TableHead>
                 )}
@@ -149,36 +149,36 @@ export function PurchaseTable({
                 {/* Installment specific columns */}
                 {type === 'tiktok_paylater' && (
                   <>
-                    <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[12%]">Total</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[10%]">Monthly</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[6%]">Term</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[6%]">Paid</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[12%]">Balance</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[8%]">Start</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[12%]">Total</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[10%]">Monthly</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[6%]">Term</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[6%]">Paid</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[12%]">Balance</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[8%]">Start</TableHead>
                   </>
                 )}
 
                 {/* Amount Column (CC/Other only) */}
                 {(type === 'credit_card' || type === 'other') && (
-                  <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[14%]">
+                  <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[14%]">
                     Amount
                   </TableHead>
                 )}
 
                 {/* Status Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[9%]">
+                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[9%]">
                   Status
                 </TableHead>
 
                 {/* Payment Due Column (CC only) */}
                 {type === 'credit_card' && (
-                  <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[11%]">
+                  <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[11%]">
                     Due Date
                   </TableHead>
                 )}
 
                 {/* Notes Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-left px-4">
+                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-left px-4">
                   Notes
                 </TableHead>
 
@@ -189,10 +189,10 @@ export function PurchaseTable({
           <TableBody>
             {filteredPurchases.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={type === 'tiktok_paylater' ? 12 : 10} className="text-center py-20 text-zinc-600 italic text-sm border-none">
+                <TableCell colSpan={type === 'tiktok_paylater' ? 12 : 10} className="text-center py-20 text-white/20 italic text-sm border-none">
                   <div className="flex flex-col items-center gap-2 opacity-30">
                     <ShoppingBag className="w-6 h-6" />
-                    <p className="tracking-widest uppercase text-[9px] font-bold">Registry empty</p>
+                    <p className="tracking-[0.2em] uppercase text-[9px] font-bold">Registry empty</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -200,10 +200,10 @@ export function PurchaseTable({
               filteredPurchases.map((p) => (
                 <TableRow 
                   key={p.id} 
-                  className="border-zinc-800/50 hover:bg-zinc-800/20 transition-colors"
+                  className="border-white/5 hover:bg-white/[0.04] transition-colors"
                 >
                   <TableCell className="pl-12 pr-6 text-center">
-                    <span className="font-medium text-zinc-100 block truncate">
+                    <span className="font-medium text-white block truncate">
                       {p.description}
                     </span>
                   </TableCell>

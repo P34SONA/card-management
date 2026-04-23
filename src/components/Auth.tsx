@@ -103,29 +103,12 @@ export function Auth({ onSessionChange }: { onSessionChange: (user: User | null)
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="flex items-center justify-center gap-3 mb-4"
+              className="flex items-center justify-center gap-3 py-6"
             >
-              <span className="text-sm font-bold tracking-[0.2em] text-white/40 uppercase">
+              <span className="text-sm font-bold tracking-[0.25em] text-white/40 uppercase whitespace-nowrap">
                 Financial <span className="text-white/80">Monitoring</span> System
               </span>
             </motion.div>
-            
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={isLogin ? 'signin' : 'signup'}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.3 }}
-              >
-                <CardTitle className="text-4xl font-bold text-center text-white tracking-tight">
-                  {isLogin ? 'Sign In' : 'Join Us'}
-                </CardTitle>
-                <CardDescription className="text-center text-white/40 font-medium mt-2">
-                  {isLogin ? 'Access your financial control center' : 'Start your journey with us today'}
-                </CardDescription>
-              </motion.div>
-            </AnimatePresence>
           </CardHeader>
 
           <CardContent className="space-y-8 pb-10 px-10">
@@ -184,7 +167,7 @@ export function Auth({ onSessionChange }: { onSessionChange: (user: User | null)
                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
                 <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
               </svg>
-              Google
+              Sign in with Google
             </Button>
           </CardContent>
 

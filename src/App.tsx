@@ -80,7 +80,27 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-950 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-900/10 via-zinc-950 to-zinc-950 font-sans selection:bg-indigo-500/30">
+    <div className="flex min-h-screen bg-[#050505] font-sans selection:bg-indigo-500/30 relative overflow-hidden">
+      {/* Liquid Background Elements */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          x: [0, 100, 0],
+          y: [0, -50, 0]
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="fixed top-[-10%] left-[-10%] w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none z-0" 
+      />
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.3, 1],
+          x: [0, -100, 0],
+          y: [0, 80, 0]
+        }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="fixed bottom-[-10%] right-[-10%] w-[700px] h-[700px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none z-0" 
+      />
+
       <Sidebar currentView={currentView} onViewChange={setCurrentView} onLogout={() => supabase.auth.signOut()} />
       
       <LogTransactionDialog 
@@ -93,7 +113,7 @@ export default function App() {
         hideTrigger
       />
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 relative z-10">
         <div className="max-w-7xl mx-auto space-y-12">
           {currentView === 'dashboard' && (
             <Dashboard cards={cards} purchases={purchases} loading={dataLoading} />
