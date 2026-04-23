@@ -57,27 +57,29 @@ export function Auth({ onSessionChange }: { onSessionChange: (user: User | null)
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/50 p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center font-bold text-white italic">
-              PR
-            </div>
-            <span className="text-xl font-bold tracking-tight">Personal Records</span>
+    <div className="flex items-center justify-center min-h-screen bg-zinc-950 px-4 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+      <Card className="w-full max-w-md shadow-2xl border-zinc-800/50 bg-zinc-900/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+        <CardHeader className="space-y-1 pt-12 pb-6">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <span className="text-xl font-bold tracking-tight text-white uppercase whitespace-nowrap">
+              Financial <span className="text-indigo-400">Monitoring</span> System
+            </span>
           </div>
-          <CardTitle className="text-2xl font-bold flex items-center gap-2">
-            {isLogin ? <LogIn className="w-6 h-6" /> : <UserPlus className="w-6 h-6" />}
-            {isLogin ? 'Welcome back' : 'Create an account'}
+          <CardTitle className="text-3xl font-black flex items-center justify-center gap-3 text-white tracking-tight">
+            {isLogin ? 'Sign In' : 'Join Us'}
           </CardTitle>
-          <CardDescription>
-            {isLogin ? 'Enter your credentials to access your logs' : 'Start tracking your spending today'}
+          <CardDescription className="text-center text-zinc-400 font-medium">
+            {isLogin ? 'Welcome back to your financial control center' : 'Complete control over your registry starts here'}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 pb-8 px-8">
           <form onSubmit={handleAuth} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest ml-1">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -85,55 +87,61 @@ export function Auth({ onSessionChange }: { onSessionChange: (user: User | null)
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-zinc-950/50 border-zinc-800 text-white rounded-2xl h-12 focus:ring-indigo-500/20"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" title="password" className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest ml-1">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="bg-zinc-950/50 border-zinc-800 text-white rounded-2xl h-12 focus:ring-indigo-500/20"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl h-12 font-bold text-sm shadow-lg shadow-indigo-600/20 transition-all active:scale-[0.98]" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLogin ? 'Log In' : 'Sign Up'}
+              {isLogin ? 'ACCESS DASHBOARD' : 'CREATE ACCOUNT'}
             </Button>
           </form>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-zinc-800" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+              <span className="bg-[#18181b] px-3 text-zinc-500">Or integrate with</span>
             </div>
           </div>
 
           <Button 
             variant="outline" 
             type="button" 
-            className="w-full" 
+            className="w-full bg-[#1c1c1f] hover:bg-zinc-800 border border-zinc-800 text-white rounded-2xl h-12 font-bold text-sm transition-all active:scale-[0.98] shadow-sm" 
             onClick={handleGoogleSignIn}
             disabled={loading}
           >
-            <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-              <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+            <svg className="mr-3 h-5 w-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+              <path fill="none" d="M0 0h48v48H0z"></path>
             </svg>
             Sign in with Google
           </Button>
         </CardContent>
-        <CardFooter>
-          <p className="text-sm text-center text-muted-foreground w-full">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+        <CardFooter className="bg-zinc-950/50 border-t border-zinc-800 py-6">
+          <p className="text-xs text-center text-zinc-500 w-full font-medium">
+            {isLogin ? "New to the system?" : "Already an operator?"}{' '}
             <button
               type="button"
-              className="text-primary hover:underline font-medium"
+              className="text-indigo-400 hover:text-indigo-300 hover:underline font-bold transition-colors ml-1"
               onClick={() => setIsLogin(!isLogin)}
             >
-              {isLogin ? 'Create one' : 'Log in here'}
+              {isLogin ? 'Register now' : 'Sign in here'}
             </button>
           </p>
         </CardFooter>
