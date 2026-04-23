@@ -130,7 +130,7 @@ export function PurchaseTable({
           <TableHeader className="bg-zinc-950 border-b border-zinc-800">
               <TableRow className="hover:bg-transparent border-none">
                 {/* Name Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 px-4 text-left w-[20%]">
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 pl-12 pr-6 text-center w-[22%]">
                   Name
                 </TableHead>
 
@@ -202,7 +202,7 @@ export function PurchaseTable({
                   key={p.id} 
                   className="border-zinc-800/50 hover:bg-zinc-800/20 transition-colors"
                 >
-                  <TableCell className="px-4 text-left">
+                  <TableCell className="pl-12 pr-6 text-center">
                     <span className="font-medium text-zinc-100 block truncate">
                       {p.description}
                     </span>
