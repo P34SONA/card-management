@@ -26,7 +26,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState<'dashboard' | 'cards' | 'logs' | 'tiktok' | 'other'>('dashboard');
   const [globalSearch, setGlobalSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid'>('pending');
 
   const { cards, purchases, loading: dataLoading, refresh } = useData();
 

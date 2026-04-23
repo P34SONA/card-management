@@ -72,6 +72,7 @@ export function PurchaseTable({
   const toggleStatus = async (p: Purchase) => {
     if (type === 'tiktok_paylater' && p.status !== 'paid') {
       const nextInstallment = p.current_installment + 1;
+      const totalTerms = p.installment_count;
       
       const nextDueDate = new Date(p.due_date);
       const nextMonth = addMonths(nextDueDate, 1);
@@ -82,17 +83,25 @@ export function PurchaseTable({
       const currentBalance = Number(p.balance || p.amount);
       const newBalance = Math.max(0, currentBalance - mAmount);
 
+      // It's paid if it's the last installment OR balance hits zero
+      const isActuallyPaid = nextInstallment >= totalTerms || newBalance <= 0;
+
       const updates: any = {
-        status: newBalance <= 0 ? 'paid' : 'pending',
-        current_installment: nextInstallment,
-        due_date: newBalance <= 0 ? p.due_date : format(targetDate, 'yyyy-MM-dd'),
+        status: isActuallyPaid ? 'paid' : 'pending',
+        current_installment: Math.min(nextInstallment, totalTerms),
+        due_date: isActuallyPaid ? p.due_date : format(targetDate, 'yyyy-MM-dd'),
         balance: newBalance
       };
 
       try {
         const { error } = await supabase.from('purchases').update(updates).eq('id', p.id);
         if (error) throw error;
-        toast.info(updates.status === 'paid' ? 'TikTok loan fully paid!' : `Month ${nextInstallment} paid. Remaining balance: ₱${newBalance.toLocaleString()}`);
+        
+        if (isActuallyPaid) {
+          toast.success(`Success! ${p.description} is now fully paid.`);
+        } else {
+          toast.info(`Month ${nextInstallment} paid. Next due: ${updates.due_date}`);
+        }
         onRefresh();
       } catch (error: any) {
         toast.error(error.message);
@@ -293,6 +302,17 @@ export function PurchaseTable({
 
                   <TableCell className="text-center py-2">
                     <div className="flex justify-center gap-1">
+                      {p.status !== 'paid' && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 hover:bg-emerald-500/10 hover:text-emerald-500 text-zinc-600" 
+                          onClick={() => toggleStatus(p)}
+                          title="Mark as Paid"
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-indigo-500/10 hover:text-indigo-400 text-zinc-600" onClick={() => handleEdit(p)}>
                         <Edit className="h-3.5 w-3.5" />
                       </Button>

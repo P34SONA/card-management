@@ -302,7 +302,7 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Borrowed Money Summary</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-            {purchases.filter(p => p.type === 'other').map(p => (
+            {purchases.filter(p => p.type === 'other' && p.status === 'pending').map(p => (
               <div key={p.id} className="flex justify-between items-center bg-transparent group">
                 <div className="flex flex-col">
                   <span className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors tracking-tight">{p.description}</span>
@@ -311,14 +311,14 @@ export function Dashboard({ cards, purchases, loading }: DashboardProps) {
                 <span className="text-sm font-mono font-bold text-indigo-400 bg-indigo-500/5 px-2 py-1 rounded">₱{Number(p.amount).toLocaleString()}</span>
               </div>
             ))}
-            {purchases.filter(p => p.type === 'other').length === 0 && (
+            {purchases.filter(p => p.type === 'other' && p.status === 'pending').length === 0 && (
               <div className="col-span-full py-10 text-center text-zinc-600 italic text-sm">No borrowed records</div>
             )}
           </div>
           <div className="mt-auto pt-4 border-t border-zinc-800/80 flex justify-between items-end">
             <div>
               <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-1">Total Borrowed</p>
-              <p className="text-lg font-mono font-bold text-indigo-400">₱{purchases.filter(p => p.type === 'other').reduce((acc, p) => acc + Number(p.amount), 0).toLocaleString()}</p>
+              <p className="text-lg font-mono font-bold text-indigo-400">₱{purchases.filter(p => p.type === 'other' && p.status === 'pending').reduce((acc, p) => acc + Number(p.amount), 0).toLocaleString()}</p>
             </div>
             <p className="text-[9px] text-zinc-600 uppercase font-bold italic">Auto-calculated from other expenses</p>
           </div>
