@@ -14,6 +14,7 @@ import { CardList } from '@/components/CardList';
 import { PurchaseTable } from '@/components/PurchaseTable';
 import { Sidebar } from '@/components/Sidebar';
 import { Loader2, Search, Plus, Filter } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useData } from '@/hooks/useData';
 import { Input } from '@/components/ui/input';
 import { LogTransactionDialog } from '@/components/LogTransactionDialog';
