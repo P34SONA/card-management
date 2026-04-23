@@ -255,20 +255,20 @@ export function LogTransactionDialog({
                   }} placeholder="0.00" className="bg-zinc-900 border-zinc-800 rounded-xl " />
                 </div>
               )}
-              {(type === 'credit_card' || type === 'savings') && (
+              {(type === 'credit_card' || type === 'tiktok_paylater') && (
                 <div className="grid gap-1.5">
                   <Label htmlFor="card" className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider ">
-                    {type === 'credit_card' ? 'Target Card' : 'Target Account'}
+                    Target Card
                   </Label>
                   <Select value={cardId} onValueChange={setCardId}>
                     <SelectTrigger className="bg-zinc-900 border-zinc-800 rounded-xl ">
-                      <SelectValue placeholder="Select account">
+                      <SelectValue placeholder="Select card">
                         {cards.find(c => c.id === cardId)?.name}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                       {cards
-                        .filter(c => (!c.account_type || c.account_type === 'credit'))
+                        .filter(c => c.account_type === 'credit')
                         .map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                         ))}

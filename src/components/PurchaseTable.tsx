@@ -130,18 +130,18 @@ export function PurchaseTable({
           <TableHeader className="bg-zinc-950 border-b border-zinc-800">
               <TableRow className="hover:bg-transparent border-none">
                 {/* Name Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 px-6 text-center w-[22%]">
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 px-4 text-left w-[20%]">
                   Name
                 </TableHead>
 
                 {/* Merchant / Category Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[13%]">
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[12%]">
                   {type === 'tiktok_paylater' ? 'Merchant' : 'Category'}
                 </TableHead>
 
                 {/* Card Column (Credit Card only) */}
                 {type === 'credit_card' && (
-                  <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[12%]">
+                  <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[10%]">
                     Card
                   </TableHead>
                 )}
@@ -154,31 +154,31 @@ export function PurchaseTable({
                     <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[6%]">Term</TableHead>
                     <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[6%]">Paid</TableHead>
                     <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[12%]">Balance</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[10%]">Start</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[8%]">Start</TableHead>
                   </>
                 )}
 
                 {/* Amount Column (CC/Other only) */}
                 {(type === 'credit_card' || type === 'other') && (
-                  <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[15%]">
+                  <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[14%]">
                     Amount
                   </TableHead>
                 )}
 
                 {/* Status Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[10%]">
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[9%]">
                   Status
                 </TableHead>
 
                 {/* Payment Due Column (CC only) */}
                 {type === 'credit_card' && (
-                  <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[15%]">
+                  <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center w-[11%]">
                     Due Date
                   </TableHead>
                 )}
 
                 {/* Notes Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-center px-6">
+                <TableHead className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider h-11 text-left px-4">
                   Notes
                 </TableHead>
 
@@ -202,7 +202,7 @@ export function PurchaseTable({
                   key={p.id} 
                   className="border-zinc-800/50 hover:bg-zinc-800/20 transition-colors"
                 >
-                  <TableCell className="px-6 text-center">
+                  <TableCell className="px-4 text-left">
                     <span className="font-medium text-zinc-100 block truncate">
                       {p.description}
                     </span>
@@ -231,10 +231,10 @@ export function PurchaseTable({
 
                   {type === 'tiktok_paylater' && (
                     <>
-                      <TableCell className="text-center font-bold font-mono text-zinc-100 italic">
+                      <TableCell className="text-center font-bold font-mono text-zinc-100">
                         ₱{Number(p.amount).toLocaleString()}
                       </TableCell>
-                      <TableCell className="text-center font-bold font-mono text-zinc-400 italic">
+                      <TableCell className="text-center font-bold font-mono text-zinc-400">
                         ₱{Number(p.monthly_amount || 0).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-center font-mono text-zinc-100">
@@ -243,7 +243,7 @@ export function PurchaseTable({
                       <TableCell className="text-center font-bold font-mono text-emerald-500">
                         {p.current_installment}
                       </TableCell>
-                      <TableCell className="text-center font-bold font-mono text-indigo-400 italic">
+                      <TableCell className="text-center font-bold font-mono text-indigo-400">
                         ₱{Number(p.balance ?? p.amount).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-center text-xs text-zinc-400">
@@ -254,7 +254,7 @@ export function PurchaseTable({
 
                   {(type === 'credit_card' || type === 'other') && (
                     <TableCell className="text-center">
-                      <span className="font-bold font-mono text-white italic">
+                      <span className="font-bold font-mono text-white">
                         ₱{Number(p.amount).toLocaleString()}
                       </span>
                     </TableCell>
@@ -284,7 +284,7 @@ export function PurchaseTable({
                     </TableCell>
                   )}
 
-                  <TableCell className="text-center text-xs text-zinc-500 truncate px-6">
+                  <TableCell className="text-left text-xs text-zinc-500 truncate px-4">
                     {type === 'tiktok_paylater' 
                       ? (p.notes?.includes('|') ? p.notes.split('|')[1]?.trim() : '')
                       : p.notes
