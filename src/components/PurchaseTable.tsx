@@ -131,7 +131,7 @@ export function PurchaseTable({
         p.status !== 'paid';
       return matchesSearch && matchesPaidFilter;
     })
-    .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime());
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <div className="bg-white/[0.03] backdrop-blur-[32px] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
@@ -139,18 +139,18 @@ export function PurchaseTable({
           <TableHeader className="bg-white/[0.02] border-b border-white/5">
               <TableRow className="hover:bg-transparent border-none">
                 {/* Name Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 pl-12 pr-6 text-center w-[22%]">
+                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 pl-12 pr-6 text-left w-[18%]">
                   Name
                 </TableHead>
 
                 {/* Merchant / Category Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[12%]">
+                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[11%]">
                   {type === 'tiktok_paylater' ? 'Merchant' : 'Category'}
                 </TableHead>
 
                 {/* Card Column (Credit Card only) */}
                 {type === 'credit_card' && (
-                  <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[10%]">
+                  <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[11%]">
                     Card
                   </TableHead>
                 )}
@@ -158,30 +158,30 @@ export function PurchaseTable({
                 {/* Installment specific columns */}
                 {type === 'tiktok_paylater' && (
                   <>
-                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[12%]">Total</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[10%]">Monthly</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[6%]">Term</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[6%]">Paid</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[12%]">Balance</TableHead>
-                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[8%]">Start</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[11%]">Total</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[11%]">Monthly</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[7%]">Term</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[7%]">Paid</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[11%]">Balance</TableHead>
+                    <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[10%]">Start</TableHead>
                   </>
                 )}
 
                 {/* Amount Column (CC/Other only) */}
                 {(type === 'credit_card' || type === 'other') && (
-                  <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[14%]">
+                  <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[16%]">
                     Amount
                   </TableHead>
                 )}
 
                 {/* Status Column */}
-                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[9%]">
+                <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[12%]">
                   Status
                 </TableHead>
 
                 {/* Payment Due Column (CC only) */}
                 {type === 'credit_card' && (
-                  <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[11%]">
+                  <TableHead className="text-[10px] uppercase font-bold text-white/30 tracking-[0.2em] h-14 text-center w-[12%]">
                     Due Date
                   </TableHead>
                 )}
@@ -192,7 +192,7 @@ export function PurchaseTable({
                 </TableHead>
 
                 {/* Action Column */}
-                <TableHead className="w-[100px]"></TableHead>
+                <TableHead className="w-[120px]"></TableHead>
               </TableRow>
           </TableHeader>
           <TableBody>
@@ -211,7 +211,7 @@ export function PurchaseTable({
                   key={p.id} 
                   className="border-white/5 hover:bg-white/[0.04] transition-colors"
                 >
-                  <TableCell className="pl-12 pr-6 text-center">
+                  <TableCell className="pl-12 pr-6 text-left">
                     <span className="font-medium text-white block truncate">
                       {p.description}
                     </span>

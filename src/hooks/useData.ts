@@ -13,7 +13,7 @@ export function useData() {
     try {
       const [{ data: cardsData }, { data: purchasesData }] = await Promise.all([
         supabase.from('credit_cards').select('*').order('created_at', { ascending: false }),
-        supabase.from('purchases').select('*').order('purchase_date', { ascending: false }),
+        supabase.from('purchases').select('*').order('created_at', { ascending: false }),
       ]);
 
       if (cardsData) setCards(cardsData);

@@ -221,8 +221,17 @@ export function LogTransactionDialog({
                       {purchaseDate ? format(purchaseDate, 'MMM d, yyyy') : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-zinc-950 border-zinc-800">
-                    <Calendar mode="single" selected={purchaseDate} onSelect={(d) => d && setPurchaseDate(d)} className="bg-zinc-950 text-white" />
+                  <PopoverContent className="w-auto p-0 bg-zinc-950 border-zinc-800" align="start">
+                    <div className="flex flex-col">
+                      <Calendar mode="single" selected={purchaseDate} onSelect={(d) => d && setPurchaseDate(d)} className="bg-zinc-950 text-white" />
+                      <div className="p-3 border-t border-zinc-800 flex justify-end">
+                        <PopoverTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 text-[10px] uppercase font-bold text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10">
+                            OK
+                          </Button>
+                        </PopoverTrigger>
+                      </div>
+                    </div>
                   </PopoverContent>
                 </Popover>
               </div>
@@ -335,8 +344,17 @@ export function LogTransactionDialog({
                       {dueDate ? format(dueDate, 'MMM d, yyyy') : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-zinc-950 border-zinc-800">
-                    <Calendar mode="single" selected={dueDate} onSelect={(d) => d && setDueDate(d)} className="bg-zinc-950 text-white" />
+                  <PopoverContent className="w-auto p-0 bg-zinc-950 border-zinc-800" align="start">
+                    <div className="flex flex-col">
+                      <Calendar mode="single" selected={dueDate} onSelect={(d) => d && setDueDate(d)} className="bg-zinc-950 text-white" />
+                      <div className="p-3 border-t border-zinc-800 flex justify-end">
+                        <PopoverTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 text-[10px] uppercase font-bold text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10">
+                            OK
+                          </Button>
+                        </PopoverTrigger>
+                      </div>
+                    </div>
                   </PopoverContent>
                 </Popover>
               </div>
